@@ -1,0 +1,216 @@
+/* ============================================ */
+/* VARIÁVEIS E ESTILOS BASE - CONSISTENTE COM O SISTEMA */
+/* ============================================ */
+:root {
+  /* Cores */
+  --primary-color: #742828;
+  --primary-hover: #a80000;
+  --secondary-color: #c58787;
+  --light-bg: #f5f5f5;
+  --white: #ffffff;
+  --text-dark: #333333;
+  --text-medium: #666666;
+  --text-light: #999999;
+  --border-color: #e0e0e0;
+  --error-color: #d32f2f;
+  
+  /* Tipografia */
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-base: 1rem;
+  --line-height-base: 1.6;
+  
+  /* Espaçamentos */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  
+  /* Bordas */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--text-dark);
+  background-color: var(--light-bg);
+  min-height: 100vh;
+}
+.logo-placeholder {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.logo{
+  max-width: 94px;
+}
+
+/* ============================================ */
+/* LAYOUT DA PÁGINA DE LOGIN */
+/* ============================================ */
+section {
+  display: flex;
+  min-height: 100vh;
+}
+
+.imgBx {
+  position: relative;
+  width: 50%;
+  background: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.imgBx img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.contentBx {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  padding: var(--space-xl);
+  background: var(--white);
+}
+
+.form-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-box h2 {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 1.75rem;
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* ============================================ */
+/* FORMULÁRIO DE LOGIN */
+/* ============================================ */
+.form-group {
+  margin-bottom: var(--space-md);
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.form-group label span {
+  color: var(--primary-color);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-main);
+  font-size: var(--font-size-base);
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.form-group input[type="submit"] {
+  background: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  transition: all 0.3s ease;
+}
+
+.form-group input[type="submit"]:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-group p {
+  color: var(--text-medium);
+  text-align: center;
+}
+
+.form-group a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-group a:hover {
+  text-decoration: underline;
+}
+
+/* Mensagem de erro */
+#mensagemErro {
+  background-color: #ffebee;
+  color: var(--error-color);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  margin-top: var(--space-md);
+  text-align: center;
+  font-weight: 500;
+  display: none;
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE */
+/* ============================================ */
+@media (max-width: 992px) {
+  .imgBx {
+    display: none;
+  }
+  
+  .contentBx {
+    width: 100%;
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 576px) {
+  .contentBx {
+    padding: var(--space-md);
+  }
+  
+  .form-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+  }
+}

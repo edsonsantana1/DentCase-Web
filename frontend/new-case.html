@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Novo Caso - Sistema Odonto-Legal</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="icon" sizes="192x192" href="imag/192.png" />
+  <link rel="icon" sizes="512x512" href="imag/512.png" />
+</head>
+<body>
+  <button class="menu-toggle" id="menu-toggle">
+    <i class="fas fa-bars"></i>
+  </button>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-placeholder">
+        <img src="imag/logo2.png" alt="Login Imagem" class="logo" />
+      </div>
+    </div>
+    <a href="dashboard.html"><span class="material-symbols-outlined">home</span> Página Inicial</a>
+    <a href="list-case.html" class="active"><span class="material-symbols-outlined">folder</span> Casos</a>
+    <a href="usuarios.html"><span class="material-symbols-outlined">group</span> Gerenciamento de Usuários</a>
+    <a href="index.html"><span class="material-symbols-outlined">logout</span> Sair</a>
+  </aside>
+
+  <div class="main-content">
+    <nav>
+      <h1>Cadastrar Novo Caso</h1>
+    </nav>
+    <div class="container">
+      <header class="main-header">
+        <h1>Cadastrar Novo Caso</h1>
+        <a href="list-case.html" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </header>
+
+      <div class="form-container">
+        <form id="case-form">
+          <!-- ID gerado automaticamente -->
+          <div class="form-group">
+            <label for="case-id">ID do Caso</label>
+            <input type="text" id="case-id" name="caseId" readonly />
+            <small>Gerado automaticamente pelo sistema</small>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="case-status">Status*</label>
+            <select id="case-status" name="status" required>
+              <option value="em andamento" selected>Em Andamento</option>
+            </select>
+          </div>
+
+          <!-- Descrição do Caso -->
+          <div class="form-group">
+            <label for="case-description">Descrição Detalhada do Caso*</label>
+            <textarea
+              id="case-description"
+              name="description"
+              required
+              rows="5"
+              placeholder="Descreva o caso com detalhes relevantes..."
+            ></textarea>
+          </div>
+
+          <!-- Informações do Paciente -->
+          <h3>Informações do Paciente</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="patient-name">Nome do Paciente*</label>
+              <input type="text" id="patient-name" name="patientName" required />
+            </div>
+            <div class="form-group">
+              <label for="patient-dob">Data de Nascimento*</label>
+              <input type="date" id="patient-dob" name="patientDOB" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="patient-gender">Gênero*</label>
+              <select id="patient-gender" name="patientGender" required>
+                <option value="">Selecione</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="patient-id">Documento de Identidade*</label>
+              <input type="text" id="patient-id" name="patientID" required />
+            </div>
+            <div class="form-group">
+              <label for="patient-contact">Contato do Paciente</label>
+              <input type="text" id="patient-contact" name="patientContact" />
+            </div>
+          </div>
+
+          <!-- Estado e Bairro -->
+          <h3>Localização Geográfica</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="estado-select">Estado*</label>
+              <select id="estado-select" name="estado" required>
+                <option value="">Carregando estados...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="bairro-select">Município*</label>
+              <select id="bairro-select" name="bairro" required>
+                <option value="">Selecione um estado primeiro</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Informações do Incidente -->
+          <h3>Informações do Incidente</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="incident-date">Data do Incidente*</label>
+              <input type="datetime-local" id="incident-date" name="incidentDate" required />
+            </div>
+            <div class="form-group">
+              <label for="incident-location">Local do Incidente*</label>
+              <input type="text" id="incident-location" name="incidentLocation" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="incident-description">Descrição do Incidente*</label>
+            <textarea id="incident-description" name="incidentDescription" required rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="incident-weapon">Instrumento/Arma (opcional)</label>
+            <input type="text" id="incident-weapon" name="incidentWeapon" />
+          </div>
+
+          <!-- Tipos e Identificação -->
+          <h3>Classificação</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="case-type">Tipo do Caso*</label>
+              <select id="case-type" name="caseType" required>
+                <option value="">Selecione</option>
+                <option value="acidente">Acidente</option>
+                <option value="morte">Morte</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="identified">Vítima Identificada?*</label>
+              <select id="identified" name="identified" required>
+                <option value="">Selecione</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Regiões Lesionadas -->
+          <div class="form-group">
+            <label>Regiões Lesionadas*</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="injuryRegions" value="cabeça" /> Cabeça</label>
+              <label><input type="checkbox" name="injuryRegions" value="mandíbula" /> Mandíbula</label>
+              <label><input type="checkbox" name="injuryRegions" value="dentes" /> Dentes</label>
+            </div>
+          </div>
+
+          <!-- Ações -->
+          <div class="form-actions">
+            <button type="reset" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Caso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- script principal -->
+  <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    // Menu toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar    = document.querySelector('.sidebar');
+    menuToggle.addEventListener('click', ()=> sidebar.classList.toggle('active'));
+
+    // Gerar ID
+    const caseIdInput = document.getElementById('case-id');
+    caseIdInput.value = 'CASO-' + Math.floor(1000+Math.random()*9000);
+
+    // Carregar Estados IBGE
+    const ufSelect    = document.getElementById('estado-select');
+    const citySelect  = document.getElementById('bairro-select');
+    const ibgeUFs     = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+                           .then(r=>r.json());
+    ibgeUFs.sort((a,b)=>a.nome.localeCompare(b.nome))
+           .forEach(uf=>{
+             ufSelect.innerHTML += `<option value="${uf.id}">${uf.nome}</option>`;
+           });
+
+    ufSelect.addEventListener('change', async ()=>{
+      citySelect.innerHTML = '<option value="">Carregando municípios…</option>';
+      if(!ufSelect.value) return citySelect.innerHTML = '<option>Selecione um estado primeiro</option>';
+      const cities = await fetch(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${ufSelect.value}/municipios`
+      ).then(r=>r.json());
+      citySelect.innerHTML = '<option value="">Selecione o município</option>';
+      cities.sort((a,b)=>a.nome.localeCompare(b.nome))
+            .forEach(c=> citySelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+    });
+
+    // Submissão do formulário
+    const caseForm = document.getElementById('case-form');
+    caseForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const fd = new FormData(caseForm);
+      const regions = [];
+      caseForm.querySelectorAll('input[name="injuryRegions"]:checked')
+             .forEach(ch=> regions.push(ch.value));
+      const data = {
+        caseId: fd.get('caseId'),
+        status: fd.get('status'),
+        description: fd.get('description'),
+        patientName: fd.get('patientName'),
+        patientDOB: fd.get('patientDOB'),
+        patientGender: fd.get('patientGender'),
+        patientID: fd.get('patientID'),
+        patientContact: fd.get('patientContact'),
+        estado: fd.get('estado'),
+        bairro: fd.get('bairro'),
+        incidentDate: fd.get('incidentDate'),
+        incidentLocation: fd.get('incidentLocation'),
+        incidentDescription: fd.get('incidentDescription'),
+        incidentWeapon: fd.get('incidentWeapon'),
+        caseType: fd.get('caseType'),
+        identified: fd.get('identified'),
+        injuryRegions: regions
+      };
+      const token = localStorage.getItem('token');
+      if (!token) return alert('Você precisa estar logado.');
+      const base = ['localhost','127.0.0.1'].includes(location.hostname)
+                   ? 'http://localhost:3000' 
+                   : 'https://seu-backend.com';
+      const res = await fetch(`${base}/api/cases`, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      if(res.ok){
+        alert('Caso cadastrado com sucesso!');
+        window.location.href='list-case.html';
+      } else {
+        const err = await res.json();
+        alert('Erro: '+(err.message||res.statusText));
+      }
+    });
+  });
+  </script>
+</body>
+</html>

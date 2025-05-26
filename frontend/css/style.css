@@ -1,0 +1,1372 @@
+/* ==================== */
+/* RESET E CONFIGURAÇÕES BASE */
+/* ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ==================== */
+/* MENU HAMBURGUER */
+/* ==================== */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 30px;
+    height: 30px;
+    z-index: 1001;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #730E0E;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.menu-toggle:hover span {
+    background-color: #8b0000;
+}
+
+/* Esconde o menu toggle quando sidebar está visível */
+.sidebar:not(.hidden) ~ .menu-toggle {
+    display: none;
+}
+
+/* Mostra o menu toggle quando sidebar está escondida */
+.sidebar.hidden ~ .menu-toggle {
+    display: flex;
+}
+
+/* ==================== */
+/* SIDEBAR (MENU LATERAL) */
+/* ==================== */
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background: #742828;
+    color: #ffff;
+    padding: 1rem;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.logo-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;  /* Garante que o container ocupe toda a largura disponível */
+    margin-bottom: 1rem;  /* Caso queira um espacinho abaixo da logo */
+}
+
+
+
+.logo {
+    max-width: 80px;
+    height: auto; /* Manter a proporção da imagem */
+    display: block; /* Faz com que a imagem seja tratada como um bloco e facilite o alinhamento */
+}
+
+
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.4rem;
+    color: #ffff;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* Gerenciamento de usuários */
+.dropdown-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    color: white;
+}
+
+.expand-icon {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.dropdown-btn.active .expand-icon {
+    transform: rotate(180deg);
+}
+
+.sub-menu {
+    display: none;
+    flex-direction: column;
+    padding-left: 32px;
+}
+
+.sub-menu a {
+    padding: 8px 16px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.sub-menu a:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    color: white;
+}
+
+/* ==================== */
+/* CONTEÚDO PRINCIPAL */
+/* ==================== */
+.main-content {
+    margin-left: 250px;
+    padding: 2rem;
+    flex: 1;
+    transition: margin-left 0.3s ease;
+}
+
+/* ==================== */
+/* LISTA DE CASOS */
+/* ==================== */
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.search-box input {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.4rem;
+    flex: 1;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.search-box input::placeholder {
+    color: #999;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 180px;
+}
+
+.filter-group label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.3rem;
+    color: #333;
+    font-size: 0.85rem;
+    background-color: white;
+    min-width: 120px;
+}
+
+.cases-list-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.case-list-item {
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+    border-radius: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+}
+
+.case-list-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.case-list-content {
+    flex: 1;
+    cursor: pointer;
+}
+
+.case-list-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.case-id {
+    font-weight: bold;
+    color: #8b0000;
+    font-size: 0.9rem;
+}
+
+.case-title {
+    font-size: 1.1rem;
+    flex: 1;
+    color: #333;
+}
+
+.case-status {
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-aberto {
+    background-color: #f5f5f5;
+    color: #8b0000;
+    border: 1px solid #8b0000;
+}
+
+.status-em-andamento {
+    background-color: #f5f5f5;
+    color: #8b0000;
+    border: 1px solid #8b0000;
+}
+
+.status-pendente {
+    background-color: #f5f5f5;
+    color: #a80000;
+    border: 1px solid #a80000;
+}
+
+.status-concluido {
+    background-color: #f5f5f5;
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
+}
+
+.case-description {
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.case-meta {
+    font-size: 0.85rem;
+    color: #999;
+    display: flex;
+    gap: 1rem;
+}
+
+.case-list-actions {
+    display: flex;
+    align-items: center;
+    padding-left: 1rem;
+    gap: 0.5rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.page-number {
+    font-weight: bold;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.3rem;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.page-number.active {
+    background-color: #8b0000;
+    color: white;
+}
+
+/* ==================== */
+/* DETALHES DO CASO */
+/* ==================== */
+.case-header {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.case-header h1 {
+    font-size: 1.8rem;
+    color: #8b0000;
+    margin-bottom: 1rem;
+}
+
+.case-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.case-id {
+    font-weight: bold;
+    color: #8b0000;
+    background-color: #f5f5f5;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.case-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-open {
+    background-color: #f5f5f5;
+    color: #8b0000;
+    border: 1px solid #8b0000;
+}
+
+.case-details {
+    margin: 1.5rem 0;
+    line-height: 1.6;
+}
+
+.case-details p {
+    margin-bottom: 0.8rem;
+    color: #555;
+}
+
+.case-details strong {
+    color: #8b0000;
+}
+
+.case-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* ==================== */
+/* SEÇÃO DE EVIDÊNCIAS */
+/* ==================== */
+.evidence-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header h2 {
+    color: #8b0000;
+    font-size: 1.5rem;
+}
+
+.section-header h2 i {
+    margin-right: 0.5rem;
+}
+
+.evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.evidence-item {
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.2s;
+}
+
+.evidence-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.evidence-content {
+    margin-bottom: 1rem;
+}
+
+.evidence-content div {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    color: #555;
+}
+
+.evidence-content strong {
+    color: #8b0000;
+}
+
+.evidence-files {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.evidence-files p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.evidence-files a {
+    color: #8b0000;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.evidence-files a:hover {
+    text-decoration: underline;
+}
+
+.empty-evidence-message {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    display: none;
+}
+
+.empty-evidence-message h3 {
+    color: #8b0000;
+    margin-bottom: 0.5rem;
+}
+
+.empty-evidence-message p {
+    font-size: 0.9rem;
+
+
+}
+
+.evidence-image, .evidence-video {
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  
+
+/* ==================== */
+/* BOTÕES DE EVIDÊNCIA */
+/* ==================== */
+.evidence-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-laudo,
+.btn-edit-evidence,
+.btn-delete-evidence {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-laudo {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-laudo:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-edit-evidence {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-edit-evidence:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-delete-evidence {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-delete-evidence:hover {
+    background-color: #8b0000;
+    transform: translateY(-1px);
+}
+
+/* ==================== */
+/* BOTÃO GERAR DE LAUDO */
+
+.btn-generate-report {
+    background-color: #742828;      /* mesma cor que .btn-laudo etc */
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;         /* igual aos outros botões */
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-generate-report:hover {
+    background-color: #a80000;      /* hover igual aos outros */
+    transform: translateY(-1px);
+}
+
+.btn-generate-report:active {
+    transform: translateY(0);       /* opcional para feedback ao clicar */
+}
+
+.btn-generate-report:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    color: #f0f0f0;
+    box-shadow: none;
+}
+
+  
+
+/* ==================== */
+/* MODAIS */
+/* ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px; /* Tamanho padrão para modais */
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: relative;
+    margin: auto;
+}
+
+.modal-content h2 {
+    color: #8b0000;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.close {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+}
+
+.close:hover {
+    color: #8b0000;
+}
+
+/* Modal de evidências e laudo um pouco maiores */
+#evidence-modal .modal-content,
+#evidence-laudo-modal .modal-content {
+    max-width: 600px;
+}
+
+/* Modal de edição de caso (mantém o padrão de 500px) */
+#editModal .modal-content {
+    max-width: 500px;
+}
+
+/* Formulários dentro dos modais */
+.modal-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-form .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-form .form-group input,
+.modal-form .form-group select,
+.modal-form .form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.modal-form .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.modal-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-form .location-fields {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-form .location-input {
+    flex: 1;
+}
+
+.modal-form .btn-location {
+    background-color: #742828;
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.modal-form .btn-location:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* ==================== */
+/* ESTILOS ESPECÍFICOS PARA NEW CASE */
+/* ==================== */
+.form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 1.5rem;
+}
+
+.form-container h1 {
+    color: #8b0000;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-container h3 {
+    color: #8b0000;
+    font-size: 1.3rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #8b0000;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group input[readonly] {
+    background-color: #f9f9f9;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Agrupamento dos checkboxes e radios */
+.checkbox-group,
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-group label,
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #444;
+    user-select: none;
+}
+
+/* Estilo visual customizado para checkboxes e radios */
+.checkbox-group input[type="checkbox"],
+.radio-group input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Hover nos labels */
+.checkbox-group label:hover,
+.radio-group label:hover {
+    color: #8b0000;
+}
+
+/* Foco acessível */
+.checkbox-group input[type="checkbox"]:focus,
+.radio-group input[type="radio"]:focus {
+    outline: 2px solid #8b0000;
+    outline-offset: 2px;
+}
+
+/* Para botões de ação, manter a consistência */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+}
+
+
+/* Ajustes para campos de data/hora */
+input[type="date"],
+input[type="datetime-local"] {
+    padding: 0.7rem 0.8rem;
+}
+
+/* Mensagens de ajuda */
+.form-group small {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Seções do formulário */
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Ações do formulário */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Validação de campos */
+.form-group .error-message {
+    color: #d32f2f;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: none;
+}
+
+.form-group.invalid .error-message {
+    display: block;
+}
+
+.form-group.invalid input,
+.form-group.invalid select,
+.form-group.invalid textarea {
+    border-color: #d32f2f;
+}
+
+/* ==================== */
+/* CADASTRO DE NOVO CASO */
+/* ==================== */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.main-header h1 {
+    color: #8b0000;
+    font-size: 1.8rem;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group input[type="datetime-local"],
+.form-group input[type="text"]:read-only {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+/* ==================== */
+/* BOTÕES - COMPARTILHADO */
+/* ==================== */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn i {
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #999;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-edit {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-status {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-status:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-report {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-report:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-report:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-view {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-view:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-delete {
+    background-color: #742828;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #8b0000;
+    transform: translateY(-1px);
+}
+
+.btn-location {
+    background-color: #742828;
+    color: white;
+    margin-top: 0.5rem;
+}
+
+.btn-location:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-submit {
+    background-color: #742828;
+    color: white;
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    background-color: #a80000;
+    transform: translateY(-1px);
+}
+
+.btn-pagination {
+    padding: 0.4rem 0.7rem;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== */
+/* LISTA DE USUÁRIOS */
+/* ==================== */
+.users-list-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.user-list-item {
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+    border-radius: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+}
+
+.user-list-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.user-list-content {
+    flex: 1;
+    cursor: pointer;
+}
+
+.user-list-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-id {
+    font-weight: bold;
+    color: #8b0000;
+    font-size: 0.9rem;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    flex: 1;
+    color: #333;
+}
+
+.user-role {
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.role-administrador {
+    background-color: #f5f5f5;
+    color: #8b0000;
+    border: 1px solid #8b0000;
+}
+
+.role-perito {
+    background-color: #f5f5f5;
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
+}
+
+.role-assistente {
+    background-color: #f5f5f5;
+    color: #a80000;
+    border: 1px solid #a80000;
+}
+
+.user-email {
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.user-meta {
+    font-size: 0.85rem;
+    color: #999;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Estilos específicos para o modal de usuário */
+#userModal .modal-content {
+    max-width: 600px;
+}
+
+#userModal .form-group input,
+#userModal .form-group select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#userModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#userModal .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+#deleteBtn {
+    margin-right: auto;
+}
+
+/* ==================== */
+/* RESPONSIVIDADE */
+/* ==================== */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 70px;
+    }
+    
+    .list-header,
+    .filters,
+    .case-actions,
+    .evidence-actions,
+    .form-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .search-box {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .search-box input {
+        width: 100%;
+    }
+    
+    .case-list-item,
+    .evidence-item,
+    .user-list-item {
+        flex-direction: column;
+    }
+    
+    .case-list-actions {
+        padding-left: 0;
+        margin-top: 1rem;
+        justify-content: flex-start;
+    }
+    
+    .modal-content {
+        padding: 1.5rem;
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .evidence-actions {
+        flex-direction: column;
+    }
+    
+    .btn-laudo,
+    .btn-edit-evidence,
+    .btn-delete-evidence {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .case-meta,
+    .user-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .section-header .btn {
+        width: 100%;
+    }
+    
+    /* Ajustes para o menu toggle */
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .sidebar:not(.hidden) ~ .menu-toggle {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    nav h1,
+    .main-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .modal-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .modal-form .location-fields {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    /* Ajustes para campos de filtro */
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-group select {
+        width: 100%;
+    }
+}

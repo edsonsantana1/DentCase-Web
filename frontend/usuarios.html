@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Usuários - Sistema Odonto-Legal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="icon" sizes="192x192" href="imag/192.png"/>
+  <link rel="icon" sizes="512x512" href="imag/512.png"/>
+</head>
+<body>
+  <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-placeholder">
+        <img src="imag/logo2.png" alt="Login Imagem" class="logo"/>
+      </div>
+    </div>
+    <a href="dashboard.html"><span class="material-symbols-outlined">home</span> Página Inicial</a>
+    <a href="list-case.html"><span class="material-symbols-outlined">folder</span> Casos</a>
+    <a href="usuarios.html" class="active"><span class="material-symbols-outlined">group</span> Gerenciamento de Usuários</a>
+    <a href="index.html"><span class="material-symbols-outlined">logout</span> Sair</a>
+  </aside>
+
+  <div class="main-content">
+    <nav>
+      <h1>Gerenciamento de Usuários</h1>
+    </nav>
+
+    <div class="container">
+      <header class="list-header">
+        <div class="search-box">
+          <input type="text" id="search-user" placeholder="Buscar por matrícula ou nome...">
+          <button class="btn btn-search"><i class="fas fa-search"></i></button>
+        </div>
+        <button class="btn btn-primary" onclick="openUserModal('new')">
+          <i class="fas fa-plus"></i> Novo Usuário
+        </button>
+      </header>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label for="filter-role">Filtrar por tipo:</label>
+          <select id="filter-role">
+            <option value="all">Todos</option>
+            <option value="administrador">Administrador</option>
+            <option value="perito">Perito</option>
+            <option value="assistente">Assistente</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-date">Ordenar por:</label>
+          <select id="filter-date">
+            <option value="recentes">Mais recentes</option>
+            <option value="antigos">Mais antigos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="users-list-container" id="users-list-container">
+        <!-- Conteúdo dinâmico gerado por JavaScript -->
+      </div>
+
+      <div class="pagination">
+        <button class="btn btn-pagination" disabled><i class="fas fa-chevron-left"></i></button>
+        <span class="page-number active">1</span>
+        <button class="btn btn-pagination"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de usuário -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeUserModal()">&times;</span>
+      <h2 id="modalTitle">Editar Usuário</h2>
+
+      <form id="userForm">
+        <input type="hidden" id="userId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="userRole">Tipo de Usuário</label>
+            <select id="userRole" required>
+              <option value="administrador">Administrador</option>
+              <option value="perito">Perito</option>
+              <option value="assistente">Assistente</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="userName">Nome Completo</label>
+            <input type="text" id="userName" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="userEmail">E-mail</label>
+            <input type="email" id="userEmail" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="userPassword">Senha</label>
+            <input type="password" id="userPassword" placeholder="Deixe em branco para manter a atual" />
+          </div>
+          <div class="form-group">
+            <label for="userConfirmPassword">Confirmar Senha</label>
+            <input type="password" id="userConfirmPassword" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancelar</button>
+          <button type="button" class="btn btn-delete" id="deleteBtn" onclick="deleteUser()">Excluir</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/usuario.js"></script>
+</body>
+</html>
