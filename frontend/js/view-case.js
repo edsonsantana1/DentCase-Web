@@ -596,3 +596,115 @@ reportForm.addEventListener('submit', (e) => {
   // Resetar o form (opcional)
   reportForm.reset();
 });
+
+
+
+
+const statusSpan = document.getElementById('case-status');
+const btnChangeStatus = document.getElementById('change-status');
+
+// Status possíveis para o caso (ajuste para os status que seu backend aceita)
+const statuses = ['em andamento', 'finalizado', 'arquivado'];
+
+// Pega o status atual do texto no span (garanta que o texto esteja no formato esperado)
+let currentStatus = statusSpan.textContent.trim().toLowerCase();
+
+// 🔄 Pega o ID real do caso da URL
+const urlParams = new URLSearchParams(window.location.search);
+const caseId = urlParams.get('id'); // Ex: ?id=6834f3793ee3d8364cd6cf7f
+
+if (!caseId) {
+  alert('ID do caso não encontrado na URL.');
+}
+
+// Função para pegar o índice do status atual
+function getStatusIndex(status) {
+  return statuses.indexOf(status);
+}
+
+// Função para alterar status localmente e no backend
+async function changeStatus() {
+  let currentIndex = getStatusIndex(currentStatus);
+  let nextIndex = (currentIndex + 1) % statuses.length;
+  let nextStatus = statuses[nextIndex];
+
+  const token = localStorage.getItem('token'); 
+
+  if (!token) {
+    alert('Usuário não autenticado. Faça login novamente.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/cases/${caseId}/status`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erro ao alterar status no servidor');
+    }
+
+    const updatedCase = await response.json();
+
+    statusSpan.textContent = updatedCase.status.charAt(0).toUpperCase() + updatedCase.status.slice(1);
+    currentStatus = updatedCase.status;
+
+    alert(`Status alterado para: ${updatedCase.status}`);
+
+  } catch (error) {
+    alert('Falha ao alterar status: ' + error.message);
+  }
+}
+
+btnChangeStatus.addEventListener('click', changeStatus);
+
+
+//convertendo o código do estado para o nome
+
+const estadosBR = {
+  "11": "Rondônia",
+  "12": "Acre",
+  "13": "Amazonas",
+  "14": "Roraima",
+  "15": "Pará",
+  "16": "Amapá",
+  "17": "Tocantins",
+  "21": "Maranhão",
+  "22": "Piauí",
+  "23": "Ceará",
+  "24": "Rio Grande do Norte",
+  "25": "Paraíba",
+  "26": "Pernambuco",
+  "27": "Alagoas",
+  "28": "Sergipe",
+  "29": "Bahia",
+  "31": "Minas Gerais",
+  "32": "Espírito Santo",
+  "33": "Rio de Janeiro",
+  "35": "São Paulo",
+  "41": "Paraná",
+  "42": "Santa Catarina",
+  "43": "Rio Grande do Sul",
+  "50": "Mato Grosso do Sul",
+  "51": "Mato Grosso",
+  "52": "Goiás",
+  "53": "Distrito Federal"
+};
+
+
+// No createCase:
+const codigoEstado = req.body.estado;
+const nomeEstado = estadosBR[codigoEstado] || "Não informado";
+
+const newCase = new Case({
+  // ... outros campos ...
+  estado: nomeEstado,
+  // ...
+});
+

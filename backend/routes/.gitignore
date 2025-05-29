@@ -1,0 +1,20 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar pacotes lock
+package-lock.json
+yarn.lock
+
+# Ignorar diretório de build
+dist/
+build/
+
+# Ignorar arquivos de ambiente
+.env
+.env.local
+.env.development
+.env.production
+.env.test
