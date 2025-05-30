@@ -55,33 +55,29 @@ window.addEventListener('DOMContentLoaded', async function () {
       const data = await res.json();
 
       new Chart(document.getElementById('bairroChart'), {
-        type: 'scatter',
+        type: 'bar',
         data: {
+          labels: data.labels,
           datasets: [{
             label: 'Número de casos',
             data: data.data,
-            pointBackgroundColor: data.pointBackgroundColor,
-            pointBorderColor: data.pointBorderColor,
-            pointBorderWidth: 2
+            backgroundColor: ['#36A2EB', '#FF6384'] // cor verde, pode trocar
           }]
         },
         options: {
           responsive: true,
           scales: {
-            x: {
-              title: { display: true, text: 'Bairros' },
-              ticks: {
-                callback: function (value) {
-                  return data.labels[value - 1] || value;
-                }
-              }
-            },
             y: {
+              beginAtZero: true,
               title: { display: true, text: 'Número de Casos' }
+            },
+            x: {
+              title: { display: true, text: 'Bairros' }
             }
           }
         }
       });
+      
     } catch (err) {
       console.error('Erro ao carregar gráfico de bairros:', err);
     }
