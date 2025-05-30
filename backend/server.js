@@ -9,6 +9,7 @@ const evidenceRoutes = require('./routes/evidenceRoutes');
 const laudoRoutes = require('./routes/laudoRoutes');
 const relatorioRoutes = require('./routes/relatorioRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const vitimaRoutes = require('./routes/vitimaRoutes');
 
 const app = express();
 const path = require('path');
@@ -47,6 +48,7 @@ app.use('/api/evidences', evidenceRoutes);
 app.use('/api/laudos', laudoRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/vitimas', vitimaRoutes);
 
 // ✅ 6) Servir arquivos estáticos da pasta "uploads"
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
