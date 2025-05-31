@@ -11,15 +11,21 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sgratzl/chartjs-chart-boxplot": "^4.4.4",
     "backend": "file:",
     "bcryptjs": "^3.0.2",
+    "chart.js": "^4.4.9",
+    "chartjs-chart-box-and-violin-plot": "^4.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "ml-kmeans": "^6.0.0",
     "mongoose": "^8.15.1",
     "multer": "^2.0.0",
     "pdf": "^0.1.0",
-    "pdfkit": "^0.17.1"
+    "pdfkit": "^0.17.1",
+    "react-chartjs-2": "^5.3.0",
+    "regression": "^2.0.1"
   }
 }

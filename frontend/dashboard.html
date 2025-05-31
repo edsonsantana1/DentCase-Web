@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Casos - Sistema Odonto-Legal</title>
 
+  <!-- Estilos -->
   <link rel="stylesheet" href="css/dashboard.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" 
+        rel="stylesheet" />
 
+  <!-- Scripts -->
+ 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@7.4.0/build/Chart.BoxPlot.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="js/dashboard.js" defer></script>
 </head>
 <body>
@@ -20,44 +27,83 @@
       </div>
     </div>
 
-  
-    <!-- Dashboard ativo -->
-    <a href="dashboard.html" class="active"><span class="material-symbols-outlined">bar_chart</span> Dashboard</a>
-    
-    <!-- Casos sem 'active' -->
-    <a href="list-case.html"><span class="material-symbols-outlined">folder</span> Casos</a>
-    
-    <!-- Outros itens normais -->
-    <a href="usuarios.html"><span class="material-symbols-outlined">group</span> Gerenciamento de Usuários</a>
-    <a href="index.html"><span class="material-symbols-outlined">logout</span> Sair</a>
+    <!-- Menu de Navegação -->
+    <nav class="sidebar-menu">
+      <a href="dashboard.html" class="active">
+        <span class="material-symbols-outlined">bar_chart</span> Dashboard
+      </a>
+      <a href="list-case.html">
+        <span class="material-symbols-outlined">folder</span> Casos
+      </a>
+      <a href="usuarios.html">
+        <span class="material-symbols-outlined">group</span> Gerenciamento de Usuários
+      </a>
+      <a href="index.html">
+        <span class="material-symbols-outlined">logout</span> Sair
+      </a>
+    </nav>
   </aside>
 
-   <div class="main-content">
-  <h1 class="dashboard-title">Dashboard</h1>
-  <div class="dashboard-wrapper">
-    
-  <div class="dashboard-wrapper">
-    <div class="chart-container">
-      <h3>Vítimas por faixa etária</h3>
-      <canvas id="faixaEtariaChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <h3>Gênero por tipo de ocorrência</h3>
-      <canvas id="generoTipoChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <h3>Casos por bairro</h3>
-      <canvas id="bairroChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <h3>Casos por faixa etária e região anatômica</h3>
-      <canvas id="faixaRegiaoChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <h3>Vítimas identificadas vs não identificadas</h3>
-      <canvas id="identificacaoChart"></canvas>
-    </div>
-  </div>
+  <main class="main-content">
+    <h1 class="dashboard-title">Dashboard</h1>
 
+    <section class="dashboard-wrapper">
+      <div class="chart-container">
+        <h3>Evolução Temporal dos Casos</h3>
+        <canvas id="temporalChartEvolucao"></canvas> <!-- para outro gráfico -->
+      </div>
+      
+      <div class="chart-container">
+        <h3>Distribuição Temporal dos Casos</h3>
+        <canvas id="temporalChartDistribuicao"></canvas> <!-- esse é o que seu JS usa -->
+      </div>
+      
+
+      <div class="chart-container">
+        <h3> Comparação de números de casos (Boxplot)</h3>
+        <canvas id="boxplotComparacaoChart" width="800" height="400"></canvas>
+
+      </div>
+      
+      <div class="chart-container">
+        <h3>Distribuição Espacial dos Casos</h3>
+        <div id="map" style="height: 300px;"></div>
+      </div>
+      
+      <div class="chart-container">
+        <h3>Clusterização de Casos (K-Means)</h3>
+        <canvas id="clusterChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Previsão de Casos (Regressão)</h3>
+        <canvas id="regressaoChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Vítimas por Faixa Etária</h3>
+        <canvas id="faixaEtariaChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Gênero por Tipo de Ocorrência</h3>
+        <canvas id="generoTipoChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Casos por Bairro</h3>
+        <canvas id="bairroChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Casos por Faixa Etária e Região Anatômica</h3>
+        <canvas id="faixaRegiaoChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Vítimas Identificadas vs Não Identificadas</h3>
+        <canvas id="identificacaoChart"></canvas>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

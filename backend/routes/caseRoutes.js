@@ -36,4 +36,5 @@ router.delete('/:id', authMiddleware, roleMiddleware(['admin']), deleteCase);
 // Adicionar evidência (admin, perito, ou assistente participante)
 router.post('/:id/evidence', authMiddleware, roleMiddleware(['admin', 'perito', 'assistente']), addEvidence);
 
+
 module.exports = router;

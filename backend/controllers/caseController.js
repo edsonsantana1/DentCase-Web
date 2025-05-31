@@ -87,7 +87,10 @@ exports.getCases = async (req, res) => {
 // Buscar caso por ID
 exports.getCaseById = async (req, res) => {
   try {
-    const caseData = await Case.findById(req.params.id).select('-__v');
+    const caseData = await Case.findById(req.params.id)
+    .select('-__v')
+    .populate('createdBy', 'name'); // aqui popula só o campo name do usuário
+
 
     if (!caseData) {
       return res.status(404).json({ error: 'Caso não encontrado' });
@@ -129,7 +132,8 @@ exports.updateCase = async (req, res) => {
       'bairro',
       'caseType',
       'identified',
-      'injuryRegions'
+      'injuryRegions',
+      'responsavel'
           
     ];
 
@@ -261,3 +265,6 @@ exports.updateCaseStatus = async (req, res) => {
     res.status(500).json({ error: 'Erro no servidor' });
   }
 };
+
+
+

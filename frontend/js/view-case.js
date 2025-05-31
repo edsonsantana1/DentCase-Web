@@ -111,7 +111,8 @@ document.addEventListener('DOMContentLoaded', function () {
       getElementSafe('case-status').className = `case-status status-${caseData.status?.toLowerCase().replace(' ', '-') || 'desconhecido'}`;
       getElementSafe('case-description').textContent = caseData.description || 'Sem descrição';
       getElementSafe('case-date').textContent = caseData.createdAt ? new Date(caseData.createdAt).toLocaleDateString('pt-BR') : 'Não informado';
-      getElementSafe('case-expert').textContent = caseData.assignedUser?.name || 'Não informado';
+      getElementSafe('case-expert').textContent = caseData.createdBy?.name || 'Responsável não informado';
+
 
       getElementSafe('patient-name').textContent = caseData.patientName || 'Não informado';
       getElementSafe('patient-dob').textContent = caseData.patientDOB ? new Date(caseData.patientDOB).toLocaleDateString('pt-BR') : 'Não informado';
@@ -278,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const updatedData = {
         description: document.getElementById('edit-case-description').value,
+        expert: document.getElementById('edit-case-expert').value,
         patientName: document.getElementById('edit-patient-name').value,
         patientDOB: document.getElementById('edit-patient-dob').value,
         patientGender: document.getElementById('edit-patient-gender').value,
@@ -288,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incidentDescription: document.getElementById('edit-incident-description').value,
         incidentWeapon: document.getElementById('edit-incident-weapon').value,
         estado: document.getElementById('edit-estado').value,
-        bairro: document.getElementById('edit-bairro').value
+        bairro: document.getElementById('edit-bairro').value,
   
       };
 
@@ -536,12 +538,15 @@ window.addEventListener('click', (e) => {
 reportForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  // Importar jsPDF (você já carregou na página)
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const doc = new jsPDF('p', 'mm', 'a4'); // página A4, mm
 
-  // Pegar dados do caso na página
-  const title = document.getElementById('report-title').value || "Relatório do Caso";
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let y = 20;
+
+  // Dados do formulário e da página
+  const title = document.getElementById('report-title').value || "RELATÓRIO DO CASO";
   const notes = document.getElementById('report-notes').value || "";
 
   const caseTitle = document.getElementById('case-title').textContent;
@@ -562,75 +567,97 @@ reportForm.addEventListener('submit', (e) => {
   const incidentDescription = document.getElementById('incident-description').textContent;
   const incidentWeapon = document.getElementById('incident-weapon').textContent;
 
-  // Montar conteúdo do PDF
-  let y = 10; // posição vertical inicial
+  // Cabeçalho: logo + título
+  // Se tiver logo, pode usar doc.addImage (exemplo comentado)
+  // const imgData = 'data:image/png;base64,...';
+  // doc.addImage(imgData, 'PNG', margin, y, 30, 30);
 
-  doc.setFontSize(18);
-  doc.text(title, 10, y);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor('#003366'); // azul escuro
+  doc.text(title.toUpperCase(), pageWidth / 2, y, { align: 'center' });
+  y += 12;
+
+  // Linha horizontal
+  doc.setDrawColor('#003366');
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageWidth - margin, y);
   y += 10;
 
-  doc.setFontSize(12);
-  doc.text(`ID do Caso: ${caseId}`, 10, y);
-  y += 8;
-  doc.text(`Título: ${caseTitle}`, 10, y);
-  y += 8;
-  doc.text(`Status: ${caseStatus}`, 10, y);
-  y += 10;
+  // Função auxiliar para texto com quebra automática
+  function addWrappedText(text, x, yPos, maxWidth, lineHeight) {
+    const splitText = doc.splitTextToSize(text, maxWidth);
+    doc.text(splitText, x, yPos);
+    return yPos + splitText.length * lineHeight;
+  }
 
-  doc.setFontSize(14);
-  doc.text("Informações do Caso", 10, y);
-  y += 8;
-  doc.setFontSize(12);
-  doc.text(`Descrição: ${caseDescription}`, 10, y);
-  y += 8;
-  doc.text(`Data de Criação: ${caseDate}`, 10, y);
-  y += 8;
-  doc.text(`Responsável: ${caseExpert}`, 10, y);
-  y += 10;
+  // Função para título de seção
+  function addSectionTitle(text, yPos) {
+    doc.setFontSize(16);
+    doc.setTextColor('#003366');
+    doc.setFont('helvetica', 'bold');
+    doc.text(text.toUpperCase(), margin, yPos);
+    yPos += 7;
+    doc.setDrawColor('#003366');
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    return yPos + 10;
+  }
 
-  doc.setFontSize(14);
-  doc.text("Informações do Paciente", 10, y);
-  y += 8;
-  doc.setFontSize(12);
-  doc.text(`Nome: ${patientName}`, 10, y);
-  y += 8;
-  doc.text(`Data de Nascimento: ${patientDob}`, 10, y);
-  y += 8;
-  doc.text(`Gênero: ${patientGender}`, 10, y);
-  y += 8;
-  doc.text(`Documento: ${patientId}`, 10, y);
-  y += 8;
-  doc.text(`Contato: ${patientContact}`, 10, y);
-  y += 10;
+  // Função para campo (label: bold, valor: normal)
+  function addField(label, value, yPos) {
+    const labelWidth = 40;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor('#000');
+    doc.text(label + ':', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    const wrappedHeight = addWrappedText(value, margin + labelWidth, yPos - 3, pageWidth - margin * 2 - labelWidth, 6);
+    return wrappedHeight + 4; // pequeno espaçamento depois do campo
+  }
 
-  doc.setFontSize(14);
-  doc.text("Informações do Incidente", 10, y);
-  y += 8;
-  doc.setFontSize(12);
-  doc.text(`Data: ${incidentDate}`, 10, y);
-  y += 8;
-  doc.text(`Local: ${incidentLocation}`, 10, y);
-  y += 8;
-  doc.text(`Descrição: ${incidentDescription}`, 10, y);
-  y += 8;
-  doc.text(`Instrumento/Arma: ${incidentWeapon}`, 10, y);
-  y += 10;
+  // Dados gerais do caso
+  y = addField('ID DO CASO', caseId, y);
+  y = addField('TÍTULO', caseTitle, y);
+  y = addField('STATUS', caseStatus, y);
+
+  y = addSectionTitle('Informações do Caso', y);
+
+  y = addField('Descrição', caseDescription, y);
+  y = addField('Data de Criação', caseDate, y);
+  y = addField('Responsável', caseExpert, y);
+
+  y = addSectionTitle('Informações do Paciente', y);
+
+  y = addField('Nome', patientName, y);
+  y = addField('Data de Nascimento', patientDob, y);
+  y = addField('Gênero', patientGender, y);
+  y = addField('Documento', patientId, y);
+  y = addField('Contato', patientContact, y);
+
+  y = addSectionTitle('Informações do Incidente', y);
+
+  y = addField('Data', incidentDate, y);
+  y = addField('Local', incidentLocation, y);
+  y = addField('Descrição', incidentDescription, y);
+  y = addField('Instrumento/Arma', incidentWeapon, y);
 
   if (notes.trim() !== "") {
-    doc.setFontSize(14);
-    doc.text("Observações Adicionais", 10, y);
-    y += 8;
-    doc.setFontSize(12);
-    doc.text(notes, 10, y);
+    y = addSectionTitle('Observações Adicionais', y);
+    y = addField('Notas', notes, y);
   }
+
+  // Rodapé com página e data de geração
+  const dateStr = new Date().toLocaleString();
+  doc.setFontSize(10);
+  doc.setTextColor('#666');
+  doc.text(`Gerado em: ${dateStr}`, margin, 290);
+  doc.text(`Página 1 de 1`, pageWidth - margin, 290, { align: 'right' });
 
   // Salvar arquivo PDF
   doc.save(`relatorio_caso_${caseId}.pdf`);
 
-  // Fechar modal após gerar relatório
   reportModal.style.display = 'none';
-
-  // Resetar o form (opcional)
   reportForm.reset();
 });
 
@@ -701,47 +728,4 @@ async function changeStatus() {
 
 btnChangeStatus.addEventListener('click', changeStatus);
 
-
-//convertendo o código do estado para o nome
-
-const estadosBR = {
-  "11": "Rondônia",
-  "12": "Acre",
-  "13": "Amazonas",
-  "14": "Roraima",
-  "15": "Pará",
-  "16": "Amapá",
-  "17": "Tocantins",
-  "21": "Maranhão",
-  "22": "Piauí",
-  "23": "Ceará",
-  "24": "Rio Grande do Norte",
-  "25": "Paraíba",
-  "26": "Pernambuco",
-  "27": "Alagoas",
-  "28": "Sergipe",
-  "29": "Bahia",
-  "31": "Minas Gerais",
-  "32": "Espírito Santo",
-  "33": "Rio de Janeiro",
-  "35": "São Paulo",
-  "41": "Paraná",
-  "42": "Santa Catarina",
-  "43": "Rio Grande do Sul",
-  "50": "Mato Grosso do Sul",
-  "51": "Mato Grosso",
-  "52": "Goiás",
-  "53": "Distrito Federal"
-};
-
-
-// No createCase:
-const codigoEstado = req.body.estado;
-const nomeEstado = estadosBR[codigoEstado] || "Não informado";
-
-const newCase = new Case({
-  // ... outros campos ...
-  estado: nomeEstado,
-  // ...
-});
 
