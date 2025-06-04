@@ -3,6 +3,9 @@ window.addEventListener('DOMContentLoaded', async function () {
     ? 'http://localhost:3000'
     : 'https://laudos-pericias.onrender.com';
 
+
+// Vítimas por Faixa Etária
+
   async function renderFaixaEtariaChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/faixa-etaria`);
@@ -15,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de vítimas',
             data: data.data,
-            backgroundColor: '#700C0C'
+            backgroundColor: ['#4e1b1b', '#ad3c3c']
           }]
         },
         options: {
@@ -48,7 +51,7 @@ window.addEventListener('DOMContentLoaded', async function () {
       console.error('Erro ao carregar gráfico de gênero/tipo:', err);
     }
   }
-
+// Casos por Bairro
   async function renderBairroChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/bairro`);
@@ -61,7 +64,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de casos',
             data: data.data,
-            backgroundColor: ['#36A2EB', '#FF6384'] // cor verde, pode trocar
+            backgroundColor: ['#4e1b1b', '#ad3c3c'] // cor verde, pode trocar
           }]
         },
         options: {
@@ -103,6 +106,8 @@ window.addEventListener('DOMContentLoaded', async function () {
       console.error('Erro ao carregar gráfico de faixa etária por região:', err);
     }
   }
+  
+// Vítimas Identificadas vs Não Identificadas
 
   async function renderIdentificacaoChart() {
     try {
@@ -116,7 +121,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Vítimas',
             data: data.data,
-            backgroundColor: data.backgroundColor
+            backgroundColor: data,backgroundColor: ['#4e1b1b', '#ad3c3c']
           }]
         },
         options: {
@@ -128,7 +133,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  // Previsão de Casos (Regressão)
+  // Previsão de Casos (Regressão) ##
 
 
   
@@ -145,7 +150,7 @@ window.addEventListener('DOMContentLoaded', async function () {
             label: 'Casos por mês',
             data: data.data,
             borderColor: '#700C0C',
-            backgroundColor: 'rgba(112,12,12,0.2)',
+            backgroundColor: 'rgba(71, 67, 67, 0.2)',
             tension: 0.3,
             fill: true
           }]
@@ -170,7 +175,8 @@ window.addEventListener('DOMContentLoaded', async function () {
   }
   
 
-// regressão
+//  Previsão de Casos (Regressão)
+
   async function renderIdentificacaoRegressaoChart() {
     const API_BASE_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
       ? 'http://localhost:3000'
