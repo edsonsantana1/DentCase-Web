@@ -204,14 +204,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    height: 350px; /* Define altura padrão para todos os containers */
   }
   
   canvas {
+    margin-top: 10px;
     width: 100% !important;
-    height: 100% !important;
-    flex-grow: 1; /* Faz o canvas ocupar o espaço restante do container */
-    object-fit: contain; /* Garante que o gráfico não estique */
+    height: auto !important;
   }
-  

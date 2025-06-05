@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     : 'https://laudos-pericias.onrender.com';
 
 
-// Vítimas por Faixa Etária
+// Vítimas por Faixa Etária 3
 
   async function renderFaixaEtariaChart() {
     try {
@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de vítimas',
             data: data.data,
-            backgroundColor: ['#4e1b1b', '#ad3c3c', '#cc6c6c']
+            backgroundColor: ['#4e1b1b', '#ad3c3c']
           }]
         },
         options: {
@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  // Gênero por Tipo de Ocorrência
+  // Gênero por Tipo de Ocorrência 4
 
 
   async function renderGeneroTipoChart() {
@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', async function () {
       const data = await res.json();
     
       data.datasets.forEach(dataset => {
-        dataset.backgroundColor = ['#700C0C', '#C23B22', '#cc6c6c',]; // <-- Coloque aqui as cores desejadas
+        dataset.backgroundColor = ['#700C0C', '#C23B22', '#700C0C',]; // <-- Coloque aqui as cores desejadas
       });
 
 
@@ -62,7 +62,7 @@ window.addEventListener('DOMContentLoaded', async function () {
 
 
 
-// Casos por Bairro
+// Casos por Bairro  5
 
 
   async function renderBairroChart() {
@@ -77,7 +77,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de casos',
             data: data.data,
-            backgroundColor: ['#4e1b1b', '#ad3c3c', '#cc6c6c'] // cor verde, pode trocar
+            backgroundColor: ['#4e1b1b', '#ad3c3c'] // cor verde, pode trocar
           }]
         },
         options: {
@@ -99,11 +99,30 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
+  async function renderFaixaRegiaoChart() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/dashboard/faixa-regiao`);
+      const data = await res.json();
 
+      new Chart(document.getElementById('faixaRegiaoChart'), {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: data.datasets
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    } catch (err) {
+      console.error('Erro ao carregar gráfico de faixa etária por região:', err);
+    }
+  }
 
   
+// Vítimas Identificadas vs Não Identificadas 6
 
-// Vítimas Identificadas vs Não Identificadas
 
 
   async function renderIdentificacaoChart() {
@@ -122,8 +141,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           }]
         },
         options: {
-          responsive: true,
-          cutout: '60%' // Você pode reduzir para '60%' ou '50%' para um círculo mais compacto
+          responsive: true
         }
       });
     } catch (err) {
@@ -131,8 +149,7 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-
-  // Previsão de Casos (Regressão) ##
+  // Previsão de Casos (Regressão) 2
 
 
   
@@ -173,8 +190,6 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
   
-
-//  Previsão de Casos (Regressão)
 
   async function renderIdentificacaoRegressaoChart() {
     const API_BASE_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
@@ -231,9 +246,10 @@ window.addEventListener('DOMContentLoaded', async function () {
       console.error('Erro ao carregar gráfico de regressão de identificação:', err);
     }
   }
-  
 
-  // Distribuição Temporal dos Casos
+
+  
+  // Distribuição Temporal dos Casos  1
 
   window.addEventListener('DOMContentLoaded', function () {
     renderDistribuicaoTemporalChart();
@@ -310,6 +326,7 @@ window.addEventListener('DOMContentLoaded', async function () {
   renderFaixaEtariaChart();
   renderGeneroTipoChart();
   renderBairroChart();
+  renderFaixaRegiaoChart();
   renderIdentificacaoChart();
   renderTemporalChart();
   renderIdentificacaoRegressaoChart();
