@@ -113,77 +113,6 @@ exports.bairro = async (req, res) => {
   }
 };
 
-// Casos por faixa etária e região anatômica
-exports.faixaRegiao = async (req, res) => {
-  try {
-    const pipeline = [
-      {
-        $addFields: {
-          idade: calcularIdadePipeline
-        }
-      },
-      {
-        $bucket: {
-          groupBy: "$idade",
-          boundaries: [0, 18, 31, 46, 61, 150],
-          default: 150, // bucket "60+"
-          output: { cases: { $push: "$$ROOT" } }
-        }
-      },
-      {
-        $unwind: "$cases"
-      },
-      // Como injuryRegions é array com string como "mandíbula, dentes" (uma string única),
-      // precisamos separar as regiões em elementos individuais antes do group.
-      // Para isso, usaremos $split para transformar string em array, depois $unwind.
-      {
-        $addFields: {
-          regioesSeparadas: {
-            $split: [
-              {
-                $reduce: {
-                  input: "$cases.injuryRegions",
-                  initialValue: "",
-                  in: { $concat: ["$$value", ", ", "$$this"] }
-                }
-              }, ", "
-            ]
-          }
-        }
-      },
-      {
-        $unwind: "$cases.injuryRegions"
-      },
-      {
-        $group: {
-          _id: { faixaEtaria: "$_id", regiao: "$regioesSeparadas" },
-          count: { $sum: 1 }
-        }
-      }
-      
-    ];
-
-    const result = await Case.aggregate(pipeline);
-
-    const faixas = ['0-17', '18-30', '31-45', '46-60', '60+'];
-    const regioes = [...new Set(result.map(item => item._id.regiao))];
-
-    let datasets = regioes.map(regiao => {
-      return {
-        label: regiao,
-        data: faixas.map(faixa => {
-          const found = result.find(r => r._id.faixaEtaria === faixa && r._id.regiao === regiao);
-          return found ? found.count : 0;
-        })
-      };
-    });
-
-    res.json({ labels: faixas, datasets });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao buscar dados por faixa etária e região' });
-  }
-};
 
 // Vítimas identificadas vs não identificadas
 exports.identificacao = async (req, res) => {
@@ -324,61 +253,6 @@ exports.getIdentificacaoRegressao = async (req, res) => {
   } catch (error) {
     console.error('Erro ao buscar dados de regressão:', error);
     res.status(500).json({ error: 'Erro no servidor' });
-  }
-};
-
-
-// K-means clustering para casos
-
-exports.identificacaoCasos = async (req, res) => {
-  try {
-    const pipeline = [
-      {
-        $group: {
-          _id: "$identified",
-          count: { $sum: 1 }
-        }
-      }
-    ];
-
-    const result = await Case.aggregate(pipeline);
-
-    const labels = result.map(item => item._id ? 'Identificada' : 'Não identificada');
-    const data = result.map(item => item.count);
-
-    res.json({ labels, data });
-  } catch (error) {
-    console.error("Erro ao buscar dados de identificação:", error);
-    res.status(500).json({ error: "Erro ao buscar dados de identificação" });
-  }
-};
-
-
-// distribuiçaõ de casos por bairro (Boxplot)
-
-exports.boxplotComparacaoCasos = async (req, res) => {
-  try {
-    const casosAgrupados = await Case.aggregate([
-      {
-        $match: { categoria: { $exists: true }, dataOcorrencia: { $exists: true } }
-      },
-      {
-        $group: {
-          _id: "$categoria",
-          casosPorPeriodo: { $push: "$quantidadeCasos" }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    if (!casosAgrupados.length) {
-      return res.status(404).json({ error: "Nenhum dado encontrado!" });
-    }
-
-    res.json(casosAgrupados);
-  } catch (error) {
-    console.error("Erro ao gerar boxplot de comparação:", error);
-    res.status(500).json({ error: "Erro ao gerar boxplot de comparação." });
   }
 };
 
