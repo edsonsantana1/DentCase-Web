@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de vítimas',
             data: data.data,
-            backgroundColor: ['#4e1b1b', '#ad3c3c']
+            backgroundColor: ['#4e1b1b', '#ad3c3c', '#cc6c6c']
           }]
         },
         options: {
@@ -31,10 +31,18 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
+  // Gênero por Tipo de Ocorrência
+
+
   async function renderGeneroTipoChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/genero-tipo`);
       const data = await res.json();
+    
+      data.datasets.forEach(dataset => {
+        dataset.backgroundColor = ['#700C0C', '#C23B22', '#cc6c6c',]; // <-- Coloque aqui as cores desejadas
+      });
+
 
       new Chart(document.getElementById('generoTipoChart'), {
         type: 'bar',
@@ -51,7 +59,12 @@ window.addEventListener('DOMContentLoaded', async function () {
       console.error('Erro ao carregar gráfico de gênero/tipo:', err);
     }
   }
+
+
+
 // Casos por Bairro
+
+
   async function renderBairroChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/bairro`);
@@ -64,7 +77,7 @@ window.addEventListener('DOMContentLoaded', async function () {
           datasets: [{
             label: 'Número de casos',
             data: data.data,
-            backgroundColor: ['#4e1b1b', '#ad3c3c'] // cor verde, pode trocar
+            backgroundColor: ['#4e1b1b', '#ad3c3c', '#cc6c6c'] // cor verde, pode trocar
           }]
         },
         options: {
@@ -86,28 +99,12 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  async function renderFaixaRegiaoChart() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/dashboard/faixa-regiao`);
-      const data = await res.json();
 
-      new Chart(document.getElementById('faixaRegiaoChart'), {
-        type: 'bar',
-        data: {
-          labels: data.labels,
-          datasets: data.datasets
-        },
-        options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-    } catch (err) {
-      console.error('Erro ao carregar gráfico de faixa etária por região:', err);
-    }
-  }
+
   
+
 // Vítimas Identificadas vs Não Identificadas
+
 
   async function renderIdentificacaoChart() {
     try {
@@ -125,13 +122,15 @@ window.addEventListener('DOMContentLoaded', async function () {
           }]
         },
         options: {
-          responsive: true
+          responsive: true,
+          cutout: '60%' // Você pode reduzir para '60%' ou '50%' para um círculo mais compacto
         }
       });
     } catch (err) {
       console.error('Erro ao carregar gráfico de identificação:', err);
     }
   }
+
 
   // Previsão de Casos (Regressão) ##
 
@@ -311,7 +310,6 @@ window.addEventListener('DOMContentLoaded', async function () {
   renderFaixaEtariaChart();
   renderGeneroTipoChart();
   renderBairroChart();
-  renderFaixaRegiaoChart();
   renderIdentificacaoChart();
   renderTemporalChart();
   renderIdentificacaoRegressaoChart();
