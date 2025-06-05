@@ -38,12 +38,15 @@ window.addEventListener('DOMContentLoaded', async function () {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/genero-tipo`);
       const data = await res.json();
-    
-      data.datasets.forEach(dataset => {
-        dataset.backgroundColor = ['#700C0C', '#C23B22', '#700C0C',]; // <-- Coloque aqui as cores desejadas
+  
+      // Lista de cores para aplicar aos datasets
+      const cores = ['#3a1414', '#C23B22', '#700C0C'];
+  
+      // Atribui uma cor única (string) para cada dataset
+      data.datasets.forEach((dataset, i) => {
+        dataset.backgroundColor = cores[i % cores.length];
       });
-
-
+  
       new Chart(document.getElementById('generoTipoChart'), {
         type: 'bar',
         data: {
@@ -52,13 +55,40 @@ window.addEventListener('DOMContentLoaded', async function () {
         },
         options: {
           responsive: true,
-          scales: { y: { beginAtZero: true } }
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 20,
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Número de Casos'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Gênero'
+              }
+            }
+          }
         }
       });
+  
     } catch (err) {
       console.error('Erro ao carregar gráfico de gênero/tipo:', err);
     }
   }
+  
 
 
 
@@ -130,10 +160,13 @@ window.addEventListener('DOMContentLoaded', async function () {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/identificacao`);
       const data = await res.json();
 
+            // Adiciona os valores aos labels
+      const labelsComValores = data.labels.map((label, i) => `${label} (${data.data[i]})`);
+
       new Chart(document.getElementById('identificacaoChart'), {
         type: 'doughnut',
         data: {
-          labels: data.labels,
+          labels: labelsComValores,
           datasets: [{
             label: 'Vítimas',
             data: data.data,
