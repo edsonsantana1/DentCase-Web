@@ -11,7 +11,9 @@ const calcularIdadePipeline = {
   }
 };
 
-// Faixa etária
+// Vítimas por Faixa Etária 3
+
+
 exports.faixaEtaria = async (req, res) => {
   try {
     const pipeline = [
@@ -52,7 +54,9 @@ exports.faixaEtaria = async (req, res) => {
   }
 };
 
-// Gênero por tipo de ocorrência
+
+// Gênero por tipo de ocorrência  4
+
 exports.generoTipo = async (req, res) => {
   try {
     const pipeline = [
@@ -86,7 +90,10 @@ exports.generoTipo = async (req, res) => {
   }
 };
 
-// Casos por bairro
+
+// Casos por bairro 5
+
+
 exports.bairro = async (req, res) => {
   try {
     const pipeline = [
@@ -114,7 +121,9 @@ exports.bairro = async (req, res) => {
 };
 
 
-// Vítimas identificadas vs não identificadas
+
+// Vítimas identificadas vs não identificadas 6 
+
 exports.identificacao = async (req, res) => {
   try {
     const pipeline = [
@@ -138,6 +147,7 @@ exports.identificacao = async (req, res) => {
   }
 };
 
+//  Distribuição Temporal dos Casos
 //  Nova função para retornar os dados agregados por mês
 
 exports.temporalDistribuicao = async (req, res) => {
@@ -166,57 +176,6 @@ exports.temporalDistribuicao = async (req, res) => {
 
 
 
-// Controller para boxplot casos por bairro
-exports.boxplotCasosPorBairro = async (req, res) => {
-  try {
-    // Agrupa por bairro e dia, conta casos
-    const casosDiarios = await Case.aggregate([
-      {
-        $match: { bairro: { $exists: true, $ne: null }, dataOcorrencia: { $exists: true, $ne: null } }
-      },
-      {
-        $group: {
-          _id: {
-            bairro: "$bairro",
-            dia: { $dateToString: { format: "%Y-%m-%d", date: "$dataOcorrencia" } }
-          },
-          totalCasosDia: { $sum: 1 }
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.bairro",
-          casosPorDia: { $push: "$totalCasosDia" }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // Para cada bairro, calculamos min, Q1, mediana, Q3, max
-    const result = casosDiarios.map(bairroData => {
-      const sorted = bairroData.casosPorDia.slice().sort((a, b) => a - b);
-      const min = sorted[0];
-      const max = sorted[sorted.length - 1];
-      const median = quantile(sorted, 0.5);
-      const q1 = quantile(sorted, 0.25);
-      const q3 = quantile(sorted, 0.75);
-
-      return {
-        bairro: bairroData._id,
-        min,
-        q1,
-        median,
-        q3,
-        max
-      };
-    });
-
-    res.json(result);
-  } catch (error) {
-    console.error('Erro ao gerar boxplot casos por bairro:', error);
-    res.status(500).json({ error: 'Erro ao gerar boxplot casos por bairro' });
-  }
-};
 
 // Função auxiliar para cálculo de quantil
 function quantile(arr, q) {
@@ -231,23 +190,59 @@ function quantile(arr, q) {
 }
 
 
-// Exemplo simples com dados estáticos.
-// Ideal: você busca dados reais do banco e faz cálculo de regressão (ex: regressão logística).
+// Previsão de Casos (Regressão)  2
+
 
 exports.getIdentificacaoRegressao = async (req, res) => {
   try {
-    // Labels para eixo X (faixas etárias)
     const labels = ['0-10', '11-20', '21-30', '31-40', '41-50'];
 
-    // Proporção real de vítimas identificadas por faixa etária (exemplo)
-    const pontosReais = [0.2, 0.35, 0.5, 0.7, 0.8];
+    // Pipeline de agregação para contar casos identificados por faixa etária
+    const resultado = await Case.aggregate([
+      {
+        $addFields: {
+          idade: {
+            $divide: [
+              { $subtract: [new Date(), '$vitima.dataNascimento'] },
+              1000 * 60 * 60 * 24 * 365.25 // calcular idade em anos
+            ]
+          }
+        }
+      },
+      {
+        $bucket: {
+          groupBy: '$idade',
+          boundaries: [0, 11, 21, 31, 41, 51],
+          default: 'Outros',
+          output: {
+            total: { $sum: 1 },
+            identificados: {
+              $sum: {
+                $cond: [{ $eq: ['$vitima.identificado', true] }, 1, 0]
+              }
+            }
+          }
+        }
+      }
+    ]);
 
-    // Valores estimados pela regressão (linha de tendência)
-    const regressao = [0.18, 0.33, 0.52, 0.68, 0.82];
+    // Montar pontos reais (proporção de identificados por faixa)
+    const proporcoes = labels.map((label, i) => {
+      const faixa = resultado[i];
+      if (faixa && faixa.total > 0) {
+        return faixa.identificados / faixa.total;
+      } else {
+        return 0;
+      }
+    });
+
+    // Gerar linha de regressão simples (opcional — aqui usando mesma estrutura de exemplo)
+    // Se quiser calcular uma regressão de verdade, posso te ajudar com isso.
+    const regressao = gerarLinhaRegressao(proporcoes); // função abaixo
 
     res.json({
       labels,
-      pontosReais,
+      pontosReais: proporcoes,
       regressao
     });
   } catch (error) {
@@ -256,29 +251,24 @@ exports.getIdentificacaoRegressao = async (req, res) => {
   }
 };
 
+// Gera uma linha de tendência linear simples baseada nos pontos reais
+function gerarLinhaRegressao(pontos) {
+  const n = pontos.length;
+  const x = [...Array(n).keys()];
+  const y = pontos;
+
+  const mediaX = x.reduce((a, b) => a + b, 0) / n;
+  const mediaY = y.reduce((a, b) => a + b, 0) / n;
+
+  const numerador = x.reduce((sum, xi, i) => sum + (xi - mediaX) * (y[i] - mediaY), 0);
+  const denominador = x.reduce((sum, xi) => sum + Math.pow(xi - mediaX, 2), 0);
+  const m = numerador / denominador;
+  const b = mediaY - m * mediaX;
+
+  // y = mx + b para cada x
+  return x.map(xi => m * xi + b);
+}
 
 
-// Distribuição temporal dos casos   (gráfico de linha)exports.distribuicaoTemporal = async (req, res) => {
-  exports.distribuicaoTemporal = async (req, res) => {
-    try {
-      const casosPorMes = await Case.aggregate([
-        { $match: { incidentDate: { $exists: true, $ne: null } } },  // Alterado para incidentDate
-        { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$incidentDate" } }, totalCasos: { $sum: 1 } } },
-        { $sort: { _id: 1 } }
-      ]);
-  
-      console.log("Casos por mês encontrados:", JSON.stringify(casosPorMes, null, 2));
-  
-      if (!casosPorMes.length) {
-        return res.status(404).json({ error: "Nenhum dado encontrado!" });
-      }
-  
-      res.json({
-        labels: casosPorMes.map(d => d._id),
-        data: casosPorMes.map(d => d.totalCasos)
-      });
-    } catch (error) {
-      console.error("Erro ao gerar distribuição temporal:", error);
-      res.status(500).json({ error: "Erro ao gerar distribuição temporal." });
-    }
-  };
+
+
