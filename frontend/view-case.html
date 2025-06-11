@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Visualizar Caso - Sistema Odonto-Legal</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-    rel="stylesheet"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   <link rel="icon" sizes="192x192" href="imag/192.png" />
   <link rel="icon" sizes="512x512" href="imag/512.png" />
 </head>
+
 <body>
   <button class="menu-toggle" id="menu-toggle">
     <i class="fas fa-bars"></i>
@@ -27,19 +23,11 @@
         <img src="imag/logo2.png" alt="Login Imagem" class="logo" />
       </div>
     </div>
-    <a href="dashboard.html"
-      ><span class="material-symbols-outlined">home</span> Página Inicial</a
-    >
-    <a href="list-case.html" class="active"
-      ><span class="material-symbols-outlined">folder</span> Casos</a
-    >
-    <a href="usuarios.html"
-      ><span class="material-symbols-outlined">group</span> Gerenciamento de
-      Usuários</a
-    >
-    <a href="index.html"
-      ><span class="material-symbols-outlined">logout</span> Sair</a
-    >
+    <a href="dashboard.html"><span class="material-symbols-outlined">home</span> Página Inicial</a>
+    <a href="list-case.html" class="active"><span class="material-symbols-outlined">folder</span> Casos</a>
+    <a href="usuarios.html"><span class="material-symbols-outlined">group</span> Gerenciamento de
+      Usuários</a>
+    <a href="index.html"><span class="material-symbols-outlined">logout</span> Sair</a>
   </aside>
 
   <div class="main-content">
@@ -52,207 +40,202 @@
       <h1 id="case-title"></h1>
       <div class="case-meta">
         <span id="case-id"></span>
-        <span id="case-status"></span>
-      </div>
-
-        <div class="case-details">
-          <!-- Modo Visualização -->
-          <div id="view-mode">
-            <h3>Informações do Caso</h3>
-            <p>
-              <strong>Descrição:</strong> <span id="case-description"></span>
-            </p>
-            <p>
-              <strong>Data de Criação:</strong> <span id="case-date"></span>
-            </p>
-            <p>
-              <strong>Responsável:</strong> <span id="case-expert"></span>
-            </p>
-
-            <h3>Informações do Paciente</h3>
-            <p>
-              <strong>Nome:</strong> <span id="patient-name"></span>
-            </p>
-            <p>
-              <strong>Data de Nascimento:</strong> <span id="patient-dob"></span>
-            </p>
-            <p>
-              <strong>Gênero:</strong> <span id="patient-gender"></span>
-            </p>
-            <p>
-              <strong>Documento:</strong> <span id="patient-id"></span>
-            </p>
-            <p>
-              <strong>Contato:</strong> <span id="patient-contact"></span>
-            </p>
-
-            <h3>Informações do Incidente</h3>
-            <p>
-              <strong>Data:</strong> <span id="incident-date"></span>
-            </p>
-            <p>
-              <strong>Local:</strong> <span id="incident-location"></span>
-            </p>
-            <p>
-              <strong>Descrição:</strong> <span id="incident-description"></span>
-            </p>
-            <p>
-              <strong>Instrumento/Arma:</strong> <span id="incident-weapon"></span>
-            </p>
-            <p>
-              <strong>Estado:</strong> <span id="estado"></span>
-            </p>
-            <p>
-              <strong>Bairro:</strong> <span id="bairro"></span>
-            </p>
-            <p>
-              <strong>Tipo de Caso:</strong> <span id="case-type"></span>
-            </p>
-            <p>
-              <strong>Identificado:</strong> <span id="identified"></span>
-            </p>
-            <p>
-              <strong>Regiões de Lesão:</strong> <span id="injury-regions"></span>
-            </p>
-
-          </div>
-
-          <!-- Modo Edição (inicialmente oculto) -->
-          <form id="edit-mode" style="display: none;">
-            <h3>Editar Informações do Caso</h3>
-            <div class="form-group">
-              <label for="edit-case-description">Descrição:</label>
-              <textarea id="edit-case-description" class="form-control"></textarea>
-            </div>
-
-              <div class="form-group">
-                <label for="edit-case-expert">Responsável:</label>
-                <input type="text" id="edit-case-expert" class="form-control" />
-              </div>
-
-
-            <h3>Editar Informações do Paciente</h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="edit-patient-name">Nome:</label>
-                <input type="text" id="edit-patient-name" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="edit-patient-dob">Data de Nascimento:</label>
-                <input type="date" id="edit-patient-dob" class="form-control" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="edit-patient-gender">Gênero:</label>
-                <select id="edit-patient-gender" class="form-control">
-                  <option value="masculino">Masculino</option>
-                  <option value="feminino">Feminino</option>
-                  <option value="outro">Outro</option>
-                  <option value="nao_informado">Não informado</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="edit-patient-id">Documento:</label>
-                <input type="text" id="edit-patient-id" class="form-control" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="edit-patient-contact">Contato:</label>
-              <input type="text" id="edit-patient-contact" class="form-control" />
-            </div>
-            <h3>Editar Localização e Metadados</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="edit-estado">Estado:</label>
-            <input type="text" id="edit-estado" class="form-control" />
-          </div>
-          <div class="form-group">
-            <label for="edit-bairro">Bairro:</label>
-            <input type="text" id="edit-bairro" class="form-control" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="edit-case-type">Tipo de Caso:</label>
-          <input type="text" id="edit-case-type" class="form-control" />
-        </div>
-
-        <div class="form-group">
-          <label for="edit-identified">Identificado?</label>
-          <input type="checkbox" id="edit-identified" />
-        </div>
-
-        <div class="form-group">
-          <label for="edit-injury-regions">Regiões de Lesão (vírgula separado):</label>
-          <input type="text" id="edit-injury-regions" class="form-control" />
-        </div>
-
-
-            <h3>Editar Informações do Incidente</h3>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="edit-incident-date">Data:</label>
-                <input
-                  type="datetime-local"
-                  id="edit-incident-date"
-                  class="form-control"
-                />
-              </div>
-              <div class="form-group">
-                <label for="edit-incident-location">Local:</label>
-                <input
-                  type="text"
-                  id="edit-incident-location"
-                  class="form-control"
-                />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="edit-incident-description">Descrição:</label>
-              <textarea id="edit-incident-description" class="form-control"></textarea>
-            </div>
-
-            <div class="form-group">
-              <label for="edit-incident-weapon">Instrumento/Arma:</label>
-              <input type="text" id="edit-incident-weapon" class="form-control" />
-            </div>
-
-            <div class="form-actions">
-              <button type="button" id="cancel-edit" class="btn btn-secondary">
-                Cancelar
-              </button>
-              <button type="submit" id="save-edit" class="btn btn-primary">
-                Salvar Alterações
-              </button>
-            </div>
-          </form>
-        </div>
-        
-
-        <div class="case-actions">
-          <button id="edit-case" class="btn btn-edit">
-            <i class="fas fa-edit"></i> Editar
-          </button>
-          <button id="delete-case" class="btn btn-delete">
-            <i class="fas fa-trash"></i> Excluir
-          </button>
-          <button id="change-status" class="btn btn-status">
-            <i class="fas fa-exchange-alt"></i> Alterar Status
-          </button>
-          <button id="generate-report" class="btn btn-report">
-            <i class="fas fa-file-pdf"></i> Gerar Relatório
-          </button>
+        <div>
+          <select id="case-status-select" class="status-select">
+            <option value="em andamento">Em Andamento</option>
+            <option value="arquivado">Arquivado</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
         </div>
       </div>
 
-      
+      <div class="case-details">
+        <!-- Modo Visualização -->
+        <div id="view-mode">
+          <h3>Informações do Caso</h3>
+          <p>
+            <strong>Descrição:</strong> <span id="case-description"></span>
+          </p>
+          <p>
+            <strong>Data de Criação:</strong> <span id="case-date"></span>
+          </p>
+          <p>
+            <strong>Responsável:</strong> <span id="case-expert"></span>
+          </p>
 
-      <!-- Seção de Evidências -->
+          <h3>Informações do Paciente</h3>
+          <p>
+            <strong>Nome:</strong> <span id="patient-name"></span>
+          </p>
+          <p>
+            <strong>Data de Nascimento:</strong> <span id="patient-dob"></span>
+          </p>
+          <p>
+            <strong>Gênero:</strong> <span id="patient-gender"></span>
+          </p>
+          <p>
+            <strong>Documento:</strong> <span id="patient-id"></span>
+          </p>
+          <p>
+            <strong>Contato:</strong> <span id="patient-contact"></span>
+          </p>
+
+          <h3>Informações do Incidente</h3>
+          <p>
+            <strong>Data:</strong> <span id="incident-date"></span>
+          </p>
+          <p>
+            <strong>Local:</strong> <span id="incident-location"></span>
+          </p>
+          <p>
+            <strong>Descrição:</strong> <span id="incident-description"></span>
+          </p>
+          <p>
+            <strong>Instrumento/Arma:</strong> <span id="incident-weapon"></span>
+          </p>
+          <p>
+            <strong>Estado:</strong> <span id="estado"></span>
+          </p>
+          <p>
+            <strong>Bairro:</strong> <span id="bairro"></span>
+          </p>
+          <p>
+            <strong>Tipo de Caso:</strong> <span id="case-type"></span>
+          </p>
+          <p>
+            <strong>Identificado:</strong> <span id="identified"></span>
+          </p>
+          <p>
+            <strong>Regiões de Lesão:</strong> <span id="injury-regions"></span>
+          </p>
+
+        </div>
+
+        <!-- Modo Edição (inicialmente oculto) -->
+        <form id="edit-mode" style="display: none;">
+          <h3>Editar Informações do Caso</h3>
+          <div class="form-group">
+            <label for="edit-case-description">Descrição:</label>
+            <textarea id="edit-case-description" class="form-control"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-case-expert">Responsável:</label>
+            <input type="text" id="edit-case-expert" class="form-control" />
+          </div>
+
+
+          <h3>Editar Informações do Paciente</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-patient-name">Nome:</label>
+              <input type="text" id="edit-patient-name" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="edit-patient-dob">Data de Nascimento:</label>
+              <input type="date" id="edit-patient-dob" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-patient-gender">Gênero:</label>
+              <select id="edit-patient-gender" class="form-control">
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+                <option value="nao_informado">Não informado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-patient-id">Documento:</label>
+              <input type="text" id="edit-patient-id" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-patient-contact">Contato:</label>
+            <input type="text" id="edit-patient-contact" class="form-control" />
+          </div>
+          <h3>Editar Localização e Metadados</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-estado">Estado:</label>
+              <input type="text" id="edit-estado" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="edit-bairro">Bairro:</label>
+              <input type="text" id="edit-bairro" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-case-type">Tipo de Caso:</label>
+            <input type="text" id="edit-case-type" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-identified">Identificado?</label>
+            <input type="checkbox" id="edit-identified" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-injury-regions">Regiões de Lesão (vírgula separado):</label>
+            <input type="text" id="edit-injury-regions" class="form-control" />
+          </div>
+
+
+          <h3>Editar Informações do Incidente</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-incident-date">Data:</label>
+              <input type="datetime-local" id="edit-incident-date" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="edit-incident-location">Local:</label>
+              <input type="text" id="edit-incident-location" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-incident-description">Descrição:</label>
+            <textarea id="edit-incident-description" class="form-control"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-incident-weapon">Instrumento/Arma:</label>
+            <input type="text" id="edit-incident-weapon" class="form-control" />
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-edit" class="btn btn-secondary">
+              Cancelar
+            </button>
+            <button type="submit" id="save-edit" class="btn btn-primary">
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+
+
+      <div class="case-actions">
+        <button id="edit-case" class="btn btn-edit">
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button id="delete-case" class="btn btn-delete">
+          <i class="fas fa-trash"></i> Excluir
+        </button>
+        <button id="generate-report" class="btn btn-report">
+          <i class="fas fa-file-pdf"></i> Gerar Relatório
+        </button>
+      </div>
+    </div>
+
+
+
+<!-- Seção de Evidências -->
       <div class="evidence-section">
         <div class="section-header">
           <h2><i class="fas fa-microscope"></i> Evidências</h2>
@@ -336,33 +319,34 @@
 </div>
 
 
-      <!-- Modal Gerar Relatório -->
-      <div id="report-modal" class="modal">
-        <div class="modal-content">
-          <span class="close">&times;</span>
-          <h2>Gerar Relatório do Caso</h2>
-          <form id="report-form">
-            <div class="form-group">
-              <label for="report-title">Título do Relatório:</label>
-              <input type="text" id="report-title" required />
-            </div>
 
-            <div class="form-group">
-              <label for="report-notes">Observações Adicionais:</label>
-              <textarea id="report-notes" rows="4"></textarea>
-            </div>
+    <!-- Modal Gerar Relatório -->
+    <div id="report-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Gerar Relatório do Caso</h2>
+        <form id="report-form">
+          <div class="form-group">
+            <label for="report-title">Título do Relatório:</label>
+            <input type="text" id="report-title" required />
+          </div>
 
-            <button type="submit" class="btn btn-submit">
-              Gerar Relatório PDF
-            </button>
-          </form>
-        </div>
+          <div class="form-group">
+            <label for="report-notes">Observações Adicionais:</label>
+            <textarea id="report-notes" rows="4"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-submit">
+            Gerar Relatório PDF
+          </button>
+        </form>
       </div>
     </div>
+  </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/view-case.js"></script>
 </body>
-</html>
 
+</html>

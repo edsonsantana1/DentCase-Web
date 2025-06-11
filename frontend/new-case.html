@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,6 +12,7 @@
   <link rel="icon" sizes="192x192" href="imag/192.png" />
   <link rel="icon" sizes="512x512" href="imag/512.png" />
 </head>
+
 <body>
   <button class="menu-toggle" id="menu-toggle">
     <i class="fas fa-bars"></i>
@@ -53,19 +55,17 @@
             <label for="case-status">Status*</label>
             <select id="case-status" name="status" required>
               <option value="em andamento" selected>Em Andamento</option>
+              <option value="finalizado" selected>Finalizado</option>
+              <option value="arquivado" selected>Arquivado</option>
             </select>
+            <input type="hidden" id="responsavel" name="responsavel" />
           </div>
 
           <!-- Descrição do Caso -->
           <div class="form-group">
             <label for="case-description">Descrição Detalhada do Caso*</label>
-            <textarea
-              id="case-description"
-              name="description"
-              required
-              rows="5"
-              placeholder="Descreva o caso com detalhes relevantes..."
-            ></textarea>
+            <textarea id="case-description" name="description" required rows="5"
+              placeholder="Descreva o caso com detalhes relevantes..."></textarea>
           </div>
 
           <!-- Informações do Paciente -->
@@ -179,89 +179,8 @@
       </div>
     </div>
   </div>
-
-  <!-- script principal -->
-  <script>
-  document.addEventListener('DOMContentLoaded', async function() {
-    // Menu toggle
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar    = document.querySelector('.sidebar');
-    menuToggle.addEventListener('click', ()=> sidebar.classList.toggle('active'));
-
-    // Gerar ID
-    const caseIdInput = document.getElementById('case-id');
-    caseIdInput.value = 'CASO-' + Math.floor(1000+Math.random()*9000);
-
-    // Carregar Estados IBGE
-    const ufSelect    = document.getElementById('estado-select');
-    const citySelect  = document.getElementById('bairro-select');
-    const ibgeUFs     = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
-                           .then(r=>r.json());
-    ibgeUFs.sort((a,b)=>a.nome.localeCompare(b.nome))
-           .forEach(uf=>{
-             ufSelect.innerHTML += `<option value="${uf.id}">${uf.nome}</option>`;
-           });
-
-    ufSelect.addEventListener('change', async ()=>{
-      citySelect.innerHTML = '<option value="">Carregando municípios…</option>';
-      if(!ufSelect.value) return citySelect.innerHTML = '<option>Selecione um estado primeiro</option>';
-      const cities = await fetch(
-        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${ufSelect.value}/municipios`
-      ).then(r=>r.json());
-      citySelect.innerHTML = '<option value="">Selecione o município</option>';
-      cities.sort((a,b)=>a.nome.localeCompare(b.nome))
-            .forEach(c=> citySelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
-    });
-
-    // Submissão do formulário
-    const caseForm = document.getElementById('case-form');
-    caseForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const fd = new FormData(caseForm);
-      const regions = [];
-      caseForm.querySelectorAll('input[name="injuryRegions"]:checked')
-             .forEach(ch=> regions.push(ch.value));
-      const data = {
-        caseId: fd.get('caseId'),
-        status: fd.get('status'),
-        description: fd.get('description'),
-        patientName: fd.get('patientName'),
-        patientDOB: fd.get('patientDOB'),
-        patientGender: fd.get('patientGender'),
-        patientID: fd.get('patientID'),
-        patientContact: fd.get('patientContact'),
-        estado: fd.get('estado'),
-        bairro: fd.get('bairro'),
-        incidentDate: fd.get('incidentDate'),
-        incidentLocation: fd.get('incidentLocation'),
-        incidentDescription: fd.get('incidentDescription'),
-        incidentWeapon: fd.get('incidentWeapon'),
-        caseType: fd.get('caseType'),
-        identified: fd.get('identified'),
-        injuryRegions: regions
-      };
-      const token = localStorage.getItem('token');
-      if (!token) return alert('Você precisa estar logado.');
-      const base = ['localhost','127.0.0.1'].includes(location.hostname)
-                   ? 'http://localhost:3000' 
-                   : 'https://seu-backend.com';
-      const res = await fetch(`${base}/api/cases`, {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':`Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if(res.ok){
-        alert('Caso cadastrado com sucesso!');
-        window.location.href='list-case.html';
-      } else {
-        const err = await res.json();
-        alert('Erro: '+(err.message||res.statusText));
-      }
-    });
-  });
-  </script>
+  <!-- JavaScript separado -->
+  <script src="js/new-case.js"></script>
 </body>
+
 </html>

@@ -2,241 +2,240 @@
 /* VARIÁVEIS DO SISTEMA */
 /* ============================================ */
 :root {
-    --primary-color: #8b0000;
-    --primary-hover: #a80000;
-    --secondary-color: #c58787;
-    --light-bg: #f5f5f5;
-    --white: #ffffff;
-    --text-dark: #333333;
-    --text-medium: #666666;
-    --text-light: #999999;
-    --border-color: #e0e0e0;
-    --error-color: #d32f2f;
-  
-    --font-main: 'Poppins', sans-serif;
-    --font-size-base: 1rem;
-    --line-height-base: 1.6;
-  
-    --space-xs: 0.5rem;
-    --space-sm: 1rem;
-    --space-md: 1.5rem;
-    --space-lg: 2rem;
-    --space-xl: 3rem;
-  
-    --border-radius-sm: 4px;
-    --border-radius-md: 8px;
-  
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+  --primary-color: #8b0000;
+  --primary-hover: #a80000;
+  --secondary-color: #c58787;
+  --light-bg: #f5f5f5;
+  --white: #ffffff;
+  --text-dark: #333333;
+  --text-medium: #666666;
+  --text-light: #999999;
+  --border-color: #e0e0e0;
+  --error-color: #d32f2f;
+
+  --font-main: 'Poppins', sans-serif;
+  --font-size-base: 1rem;
+  --line-height-base: 1.6;
+
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ============================================ */
+/* RESET E BASE */
+/* ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-main);
+}
+
+body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* ============================================ */
+/* LAYOUT DA PÁGINA DE LOGIN */
+/* ============================================ */
+section {
+  display: flex;
+  min-height: 100vh;
+}
+
+.imgBx {
+  width: 50%;
+  background: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.imgBx img {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+.contentBx {
+  width: 50%;
+  padding: var(--space-xl);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.logo-placeholder {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.logo{
+  max-width: 94px;
+}
+
+/* ============================================ */
+/* FORMULÁRIO */
+/* ============================================ */
+.form-group {
+  margin-bottom: var(--space-md);
+  position: relative;
+}
+
+label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+label span {
+  color: var(--primary-color);
+}
+
+input,
+select {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.15);
+  outline: none;
+}
+
+input.valid {
+  border-color: #22c55e;
+}
+
+input.invalid {
+  border-color: #ef4444;
+}
+
+input[type="submit"] {
+  background: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+  border: none;
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+input[type="submit"]:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Senha com ícone de olho */
+.senha-wrapper {
+  position: relative;
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.3s;
+}
+
+.toggle-senha:hover {
+  color: var(--primary-color);
+}
+
+.form-group p {
+  color: var(--text-medium);
+  text-align: center;
+}
+
+.form-group a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-group a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================ */
+/* MENSAGEM DE ERRO */
+/* ============================================ */
+#mensagemErro {
+  background-color: #ffebee;
+  color: var(--error-color);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  margin-top: var(--space-sm);
+  text-align: center;
+  font-weight: 500;
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
   }
-  
-  /* ============================================ */
-  /* RESET E BASE */
-  /* ============================================ */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: var(--font-main);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  body {
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-    background-color: var(--light-bg);
-    color: var(--text-dark);
-    min-height: 100vh;
-  }
-  
-  /* ============================================ */
-  /* LAYOUT DA PÁGINA DE LOGIN */
-  /* ============================================ */
-  section {
-    display: flex;
-    min-height: 100vh;
-  }
-  
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE */
+/* ============================================ */
+@media (max-width: 992px) {
   .imgBx {
-    width: 50%;
-    background: var(--primary-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  .imgBx img {
-    width: 100%;
-    height: 100vh;
-    object-fit: cover;
-    opacity: 0.85;
-  }
-  
-  .contentBx {
-    width: 50%;
-    padding: var(--space-xl);
-    background: var(--white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .form-box {
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .logo-placeholder {
-    text-align: center;
-    margin-bottom: var(--space-md);
-  }
-  
-  .logo{
-    max-width: 94px;
-  }
-  
-  /* ============================================ */
-  /* FORMULÁRIO */
-  /* ============================================ */
-  .form-group {
-    margin-bottom: var(--space-md);
-    position: relative;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: var(--space-xs);
-    font-weight: 600;
-    color: var(--text-dark);
-  }
-  
-  label span {
-    color: var(--primary-color);
-  }
-  
-  input,
-  select {
-    width: 100%;
-    padding: var(--space-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-base);
-    transition: all 0.3s ease;
-  }
-  
-  input:focus,
-  select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.15);
-    outline: none;
-  }
-  
-  input.valid {
-    border-color: #22c55e;
-  }
-  
-  input.invalid {
-    border-color: #ef4444;
-  }
-  
-  input[type="submit"] {
-    background: var(--primary-color);
-    color: var(--white);
-    font-weight: 600;
-    border: none;
-    padding: var(--space-sm);
-    cursor: pointer;
-    transition: 0.3s ease-in-out;
-  }
-  
-  input[type="submit"]:hover {
-    background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-  }
-  
-  /* Senha com ícone de olho */
-  .senha-wrapper {
-    position: relative;
-  }
-  
-  .toggle-senha {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: var(--text-light);
-    transition: color 0.3s;
-  }
-  
-  .toggle-senha:hover {
-    color: var(--primary-color);
-  }
-  
-  .form-group p {
-    color: var(--text-medium);
-    text-align: center;
-  }
-  
-  .form-group a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  
-  .form-group a:hover {
-    text-decoration: underline;
-  }
-  
-  /* ============================================ */
-  /* MENSAGEM DE ERRO */
-  /* ============================================ */
-  #mensagemErro {
-    background-color: #ffebee;
-    color: var(--error-color);
-    padding: var(--space-sm);
-    border-radius: var(--border-radius-sm);
-    margin-top: var(--space-sm);
-    text-align: center;
-    font-weight: 500;
     display: none;
-    animation: fadeIn 0.3s ease-in-out;
   }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+
+  .contentBx {
+    width: 100%;
+    padding: var(--space-lg);
   }
-  
-  /* ============================================ */
-  /* RESPONSIVIDADE */
-  /* ============================================ */
-  @media (max-width: 992px) {
-    .imgBx {
-      display: none;
-    }
-  
-    .contentBx {
-      width: 100%;
-      padding: var(--space-lg);
-    }
+}
+
+@media (max-width: 576px) {
+  .contentBx {
+    padding: var(--space-md);
   }
-  
-  @media (max-width: 576px) {
-    .contentBx {
-      padding: var(--space-md);
-    }
-  
-    .logo-placeholder h2 {
-      font-size: 1.5rem;
-      margin-bottom: var(--space-md);
-    }
+
+  .logo-placeholder h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
   }
-  
+}

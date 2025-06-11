@@ -8,7 +8,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         const senha = document.getElementById("senha").value;
 
         try {
-            const resposta = await fetch('http://localhost:3000/api/auth/login', {
+            const resposta = await fetch('https://dentcase-backend.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'

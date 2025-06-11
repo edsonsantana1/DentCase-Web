@@ -1370,3 +1370,29 @@ input[type="datetime-local"] {
         width: 100%;
     }
 }
+
+/* style.css */
+.status-select {
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+}
+.status-select.status-em_andamento {
+  border-color: #8b0000;
+  color: #8b0000;
+}
+
+.status-select.status-arquivado {
+  border-color: #a80000;
+  color: #a80000;
+}
+
+.status-select.status-finalizado {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}

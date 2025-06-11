@@ -32,7 +32,7 @@ async function loadCases() {
 
     const token = localStorage.getItem('token'); // Pega o token salvo no login
 
-    const response = await fetch('http://localhost:3000/api/cases', {
+    const response = await fetch('https://dentcase-backend.onrender.com/api/cases', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

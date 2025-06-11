@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         const baseUrl = ['localhost','127.0.0.1'].includes(location.hostname)
           ? 'http://localhost:3000'
-          : 'https://laudos-pericias.onrender.com';
+          : 'https://dentcase-backend.onrender.com';
   
         const resp = await fetch(`${baseUrl}/api/cases`, {
           method: 'POST',

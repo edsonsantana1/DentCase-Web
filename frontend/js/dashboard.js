@@ -1,17 +1,110 @@
-window.addEventListener('DOMContentLoaded', async function () {
-  const API_BASE_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-    ? 'http://localhost:3000'
-    : 'https://laudos-pericias.onrender.com';
+window.addEventListener('DOMContentLoaded', () => {
+  const API_BASE_URL = 'https://dentcase-backend.onrender.com';
 
+  // 1) Distribuição Temporal dos Casos
+  async function renderDistribuicaoTemporalChart() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/dashboard/temporal`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /temporal: ${res.statusText}`);
+        return;
+      }
+      const data = await res.json();
 
-// Vítimas por Faixa Etária 3
+      if (!data.labels?.length || !data.data?.length) {
+        console.error("Nenhum dado válido recebido da API (temporal).");
+        return;
+      }
 
+      const ctx = document.getElementById('temporalChartDistribuicao');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Casos por Mês',
+            data: data.data,
+            borderColor: '#700C0C',
+            backgroundColor: 'rgba(112, 12, 12, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Número de Casos' } },
+            x: { title: { display: true, text: 'Mês/Ano' } }
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Erro ao carregar gráfico de distribuição temporal:', err);
+    }
+  }
+
+  // 2) Previsão de Casos (Regressão)
+  async function renderIdentificacaoRegressaoChart() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/dashboard/identificacao-regressao`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /identificacao-regressao: ${res.statusText}`);
+        return;
+      }
+      const data = await res.json();
+
+      const ctx = document.getElementById('regressaoChart');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: 'Proporção real de vítimas identificadas',
+              data: data.pontosReais,
+              type: 'scatter',
+              showLine: false,
+              pointRadius: 5,
+              borderColor: 'rgba(54, 162, 235, 0.7)',
+              backgroundColor: 'rgba(54, 162, 235, 0.3)'
+            },
+            {
+              label: 'Curva de regressão logística',
+              data: data.regressao,
+              type: 'line',
+              tension: 0.3,
+              borderColor: '#700C0C',
+              backgroundColor: 'rgba(112, 12, 12, 0.2)',
+              pointRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { min: 0, max: 1, title: { display: true, text: 'Probabilidade de Identificação' } },
+            x: { title: { display: true, text: 'Faixa Etária' } }
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Erro ao carregar gráfico de regressão de identificação:', err);
+    }
+  }
+
+  // 3) Vítimas por Faixa Etária
   async function renderFaixaEtariaChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/faixa-etaria`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /faixa-etaria: ${res.statusText}`);
+        return;
+      }
       const data = await res.json();
 
-      new Chart(document.getElementById('faixaEtariaChart'), {
+      const ctx = document.getElementById('faixaEtariaChart');
+      new Chart(ctx, {
         type: 'bar',
         data: {
           labels: data.labels,
@@ -31,344 +124,110 @@ window.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  // Gênero por Tipo de Ocorrência 4
-
-
+  // 4) Gênero por Tipo de Ocorrência
   async function renderGeneroTipoChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/genero-tipo`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /genero-tipo: ${res.statusText}`);
+        return;
+      }
       const data = await res.json();
-  
-      // Lista de cores para aplicar aos datasets
+
       const cores = ['#3a1414', '#C23B22', '#700C0C'];
-  
-      // Atribui uma cor única (string) para cada dataset
-      data.datasets.forEach((dataset, i) => {
-        dataset.backgroundColor = cores[i % cores.length];
-      });
-  
-      new Chart(document.getElementById('generoTipoChart'), {
+      data.datasets.forEach((ds, i) => ds.backgroundColor = cores[i % cores.length]);
+
+      const ctx = document.getElementById('generoTipoChart');
+      new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: data.labels,
-          datasets: data.datasets
-        },
+        data: { labels: data.labels, datasets: data.datasets },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                boxWidth: 20,
-                font: {
-                  size: 12
-                }
-              }
-            }
+            legend: { position: 'top', labels: { boxWidth: 20, font: { size: 12 } } }
           },
           scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Número de Casos'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Gênero'
-              }
-            }
+            y: { beginAtZero: true, title: { display: true, text: 'Número de Casos' } },
+            x: { title: { display: true, text: 'Gênero' } }
           }
         }
       });
-  
     } catch (err) {
       console.error('Erro ao carregar gráfico de gênero/tipo:', err);
     }
   }
-  
 
-
-
-// Casos por Bairro  5
-
-
+  // 5) Casos por Bairro
   async function renderBairroChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/bairro`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /bairro: ${res.statusText}`);
+        return;
+      }
       const data = await res.json();
 
-      new Chart(document.getElementById('bairroChart'), {
+      const ctx = document.getElementById('bairroChart');
+      new Chart(ctx, {
         type: 'bar',
         data: {
           labels: data.labels,
           datasets: [{
             label: 'Número de casos',
             data: data.data,
-            backgroundColor: ['#4e1b1b', '#ad3c3c'] // cor verde, pode trocar
+            backgroundColor: ['#4e1b1b', '#ad3c3c']
           }]
         },
         options: {
           responsive: true,
           scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Número de Casos' }
-            },
-            x: {
-              title: { display: true, text: 'Bairros' }
-            }
+            y: { beginAtZero: true, title: { display: true, text: 'Número de Casos' } },
+            x: { title: { display: true, text: 'Bairros' } }
           }
         }
       });
-      
+
+      const total = data.data.reduce((sum, v) => sum + v, 0);
+      document.getElementById('totalCasosBairro').textContent = `Total de casos: ${total}`;
     } catch (err) {
       console.error('Erro ao carregar gráfico de bairros:', err);
     }
   }
 
-  async function renderFaixaRegiaoChart() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/dashboard/faixa-regiao`);
-      const data = await res.json();
-
-      new Chart(document.getElementById('faixaRegiaoChart'), {
-        type: 'bar',
-        data: {
-          labels: data.labels,
-          datasets: data.datasets
-        },
-        options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-    } catch (err) {
-      console.error('Erro ao carregar gráfico de faixa etária por região:', err);
-    }
-  }
-
-  
-// Vítimas Identificadas vs Não Identificadas 6
-
-
-
+  // 6) Vítimas Identificadas vs Não Identificadas
   async function renderIdentificacaoChart() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/dashboard/identificacao`);
+      if (!res.ok) {
+        console.error(`Erro HTTP ${res.status} ao buscar /identificacao: ${res.statusText}`);
+        return;
+      }
       const data = await res.json();
 
-            // Adiciona os valores aos labels
-      const labelsComValores = data.labels.map((label, i) => `${label} (${data.data[i]})`);
-
-      new Chart(document.getElementById('identificacaoChart'), {
+      const labelsComValores = data.labels.map((lab, i) => `${lab} (${data.data[i]})`);
+      const ctx = document.getElementById('identificacaoChart');
+      new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: labelsComValores,
           datasets: [{
             label: 'Vítimas',
             data: data.data,
-            backgroundColor: data,backgroundColor: ['#4e1b1b', '#ad3c3c']
+            backgroundColor: ['#4e1b1b', '#ad3c3c']
           }]
         },
-        options: {
-          responsive: true
-        }
+        options: { responsive: true }
       });
     } catch (err) {
       console.error('Erro ao carregar gráfico de identificação:', err);
     }
   }
 
-  // Previsão de Casos (Regressão) 2
-
-
-  
-  async function renderTemporalChart() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/dashboard/temporal`);
-      const data = await res.json();
-  
-      new Chart(document.getElementById('temporalChart'), {
-        type: 'line',
-        data: {
-          labels: data.labels,
-          datasets: [{
-            label: 'Casos por mês',
-            data: data.data,
-            borderColor: '#700C0C',
-            backgroundColor: 'rgba(71, 67, 67, 0.2)',
-            tension: 0.3,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Número de Casos' }
-            },
-            x: {
-              title: { display: true, text: 'Mês/Ano' }
-            }
-          }
-        }
-      });
-  
-    } catch (err) {
-      console.error('Erro ao carregar gráfico temporal:', err);
-    }
-  }
-  
-
-  async function renderIdentificacaoRegressaoChart() {
-    const API_BASE_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-      ? 'http://localhost:3000'
-      : 'https://laudos-pericias.onrender.com';
-  
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/dashboard/identificacao-regressao`);
-      const data = await res.json();
-  
-      new Chart(document.getElementById('regressaoChart'), {
-        type: 'line',
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: 'Proporção real de vítimas identificadas',
-              data: data.pontosReais,
-              borderColor: 'rgba(54, 162, 235, 0.7)',
-              backgroundColor: 'rgba(54, 162, 235, 0.3)',
-              fill: false,
-              tension: 0,
-              pointRadius: 5,
-              showLine: false, // Exibe apenas os pontos
-              type: 'scatter'
-            },
-            {
-              label: 'Curva de regressão logística',
-              data: data.regressao,
-              borderColor: '#700C0C',
-              backgroundColor: 'rgba(112, 12, 12, 0.2)',
-              fill: false,
-              tension: 0.3,
-              pointRadius: 0,
-              type: 'line'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              min: 0,
-              max: 1,
-              title: { display: true, text: 'Probabilidade de Identificação' }
-            },
-            x: {
-              title: { display: true, text: 'Faixa Etária' }
-            }
-          }
-        }
-      });
-    } catch (err) {
-      console.error('Erro ao carregar gráfico de regressão de identificação:', err);
-    }
-  }
-
-
-  
-  // Distribuição Temporal dos Casos  1
-
-  window.addEventListener('DOMContentLoaded', function () {
-    renderDistribuicaoTemporalChart();
-  });
-  
-  async function renderDistribuicaoTemporalChart() {
-    const API_BASE_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-      ? 'http://localhost:3000'
-      : 'https://laudos-pericias.onrender.com';
-  
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/dashboard/distribuicao-temporal`);
-      const data = await res.json();
-  
-      console.log("Dados da API (Distribuição Temporal):", data);
-  
-      // Verificação correta com base na estrutura real do JSON
-      if (!data.labels || !data.data || data.labels.length === 0 || data.data.length === 0) {
-        console.error("Nenhum dado recebido da API!");
-        return;
-      }
-  
-      const canvas = document.getElementById('temporalChartDistribuicao');
-      if (!canvas) {
-        console.error("Canvas com id 'temporalChartDistribuicao' não encontrado.");
-        return;
-      }
-  
-      new Chart(canvas, {
-        type: 'line',
-        data: {
-          labels: data.labels,
-          datasets: [{
-            label: 'Casos por Mês',
-            data: data.data,
-            borderColor: '#700C0C',
-            backgroundColor: 'rgba(112, 12, 12, 0.2)',
-            fill: true,
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Número de Casos'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Mês/Ano'
-              }
-            }
-          }
-        }
-      });
-  
-    } catch (error) {
-      console.error("Erro ao carregar gráfico de distribuição temporal:", error);
-    }
-  }
-  
+  // === chamadas iniciais ===
   renderDistribuicaoTemporalChart();
-
-  
-  
-  
-  
-  // Chamada de todos os gráficos
+  renderIdentificacaoRegressaoChart();
   renderFaixaEtariaChart();
   renderGeneroTipoChart();
   renderBairroChart();
-  renderFaixaRegiaoChart();
   renderIdentificacaoChart();
-  renderTemporalChart();
-  renderIdentificacaoRegressaoChart();
-  renderClusterChart();
-
-
-  
-  
-
-
-
 });

@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost:3000/api/users';
+const apiUrl = 'https://dentcase-backend.onrender.com/api/users';
 const usersContainer = document.getElementById('users-list-container');
 const userForm = document.getElementById('userForm');
 const modal = document.getElementById('userModal');
@@ -8,42 +8,33 @@ const filterRole = document.getElementById('filter-role');
 const filterDate = document.getElementById('filter-date');
 const searchButton = document.querySelector('.btn-search');
 
-// Funções auxiliares
-function formatUserType(role) {
-  if (!role) {
-    console.warn('Role não definido:', role);
-    return 'Não definido';
-  }
+// Mapeia valores do frontend para enum do schema
+function mapFrontendRoleToBackend(rawRole) {
+  const map = {
+    'administrador': 'admin',
+    'perito': 'perito',
+    'assistente': 'assistente'
+  };
+  return map[rawRole] || 'assistente';
+}
 
+// Funções auxiliares (mantidas conforme antes)
+function formatUserType(role) {
   const roleMap = {
     'admin': 'Administrador',
-    'administrador': 'Administrador',
-    'expert': 'Perito',
     'perito': 'Perito',
-    'assistant': 'Assistente',
     'assistente': 'Assistente'
   };
-
-  const normalizedRole = role.toString().trim().toLowerCase();
-  return roleMap[normalizedRole] || role;
+  return roleMap[role] || role || 'Não definido';
 }
-
 function formatDate(dateString) {
   if (!dateString) return 'Nunca acessou';
-  try {
-    const date = new Date(dateString);
-    return isNaN(date) ? 'Data inválida' : date.toLocaleDateString('pt-BR');
-  } catch {
-    return 'Data inválida';
-  }
+  const d = new Date(dateString);
+  return isNaN(d) ? 'Data inválida' : d.toLocaleDateString('pt-BR');
 }
-
 function checkAuth() {
   const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = 'index.html';
-    return false;
-  }
+  if (!token) window.location.href = 'index.html';
   return token;
 }
 
@@ -52,10 +43,9 @@ document.getElementById('menu-toggle').addEventListener('click', () => {
   document.querySelector('.sidebar').classList.toggle('active');
 });
 
-// Modal functions
+// Abre modal para novo/editar
 function openUserModal(mode, userId = null, event) {
   if (event) event.stopPropagation();
-  
   userForm.reset();
   document.getElementById('userId').value = '';
   document.getElementById('deleteBtn').style.display = 'none';
@@ -63,103 +53,88 @@ function openUserModal(mode, userId = null, event) {
   if (mode === 'new') {
     modalTitle.textContent = 'Novo Usuário';
     modal.style.display = 'block';
-  } else if (mode === 'view' && userId) {
-    const token = checkAuth();
-    if (!token) return;
-
-    fetch(`${apiUrl}/${userId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(async res => {
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || 'Erro ao carregar usuário');
-        }
-        return res.json();
-      })
-      .then(user => {
-        modalTitle.textContent = 'Editar Usuário';
-        document.getElementById('userId').value = user._id;
-        document.getElementById('userName').value = user.nome || '';
-        document.getElementById('userEmail').value = user.email || '';
-        document.getElementById('userRole').value = user.role || 'assistant';
-        document.getElementById('deleteBtn').style.display = 'inline-block';
-        document.getElementById('userPassword').placeholder = 'Nova senha (deixe em branco para manter)';
-        modal.style.display = 'block';
-      })
-      .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro ao carregar usuário: ' + error.message);
-      });
+    return;
   }
+
+  // modo view/edit
+  const token = checkAuth();
+  fetch(`${apiUrl}/${userId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+    .then(res => res.ok ? res.json() : Promise.reject(res))
+    .then(user => {
+      modalTitle.textContent = 'Editar Usuário';
+      document.getElementById('userId').value = user._id;
+      document.getElementById('userName').value = user.nome;
+      document.getElementById('userEmail').value = user.email;
+      // já vem no formato do schema ('admin','perito','assistente')
+      document.getElementById('userRole').value = user.role;
+      document.getElementById('deleteBtn').style.display = 'inline-block';
+      document.getElementById('userPassword').placeholder = 'Nova senha (deixe em branco para manter)';
+      modal.style.display = 'block';
+    })
+    .catch(async err => {
+      const msg = (err.json ? (await err.json()).msg : err.message) || 'Erro ao carregar usuário';
+      alert(msg);
+    });
 }
 
+// Fecha modal
 function closeUserModal() {
   modal.style.display = 'none';
 }
 
-// Delete user
+// Excluir usuário
 function deleteUser(event) {
   if (event) event.stopPropagation();
-  
   const id = document.getElementById('userId').value;
   const token = checkAuth();
-  if (!token) return;
-
-  if (!confirm('ATENÇÃO: Esta ação é irreversível. Deseja realmente excluir este usuário?')) return;
+  if (!confirm('Deseja realmente excluir este usuário?')) return;
 
   fetch(`${apiUrl}/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   })
-    .then(async res => {
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Erro ao excluir usuário');
-      }
+    .then(res => res.ok ? res : Promise.reject(res))
+    .then(() => {
       closeUserModal();
       loadUsers();
       alert('Usuário excluído com sucesso!');
     })
-    .catch(error => {
-      console.error('Erro:', error);
-      alert('Erro ao excluir usuário: ' + error.message);
+    .catch(async err => {
+      const msg = (await err.json()).msg || 'Erro ao excluir usuário';
+      alert(msg);
     });
 }
 
-// Save user (create/update)
+// Criar/Atualizar usuário
 userForm.addEventListener('submit', async function (e) {
   e.preventDefault();
-
   const id = document.getElementById('userId').value;
-  const password = document.getElementById('userPassword').value;
-  const confirmPassword = document.getElementById('userConfirmPassword').value;
+  const rawRole = document.getElementById('userRole').value;
+  const senha = document.getElementById('userPassword').value;
+  const confirmSenha = document.getElementById('userConfirmPassword').value;
   const token = checkAuth();
-  if (!token) return;
 
-  if (password && password !== confirmPassword) {
-    alert('As senhas não coincidem!');
-    return;
+  if (senha && senha !== confirmSenha) {
+    return alert('As senhas não coincidem!');
+  }
+  if (!id && !senha) {
+    return alert('Senha obrigatória para novos usuários!');
   }
 
-  if (!id && !password) {
-    alert('A senha é obrigatória para novos usuários!');
-    return;
-  }
-
+  // Monta payload
   const userData = {
     nome: document.getElementById('userName').value.trim(),
     email: document.getElementById('userEmail').value.trim(),
-    role: document.getElementById('userRole').value
+    role: mapFrontendRoleToBackend(rawRole)
   };
-
-  if (password) userData.senha = password;
+  if (senha) userData.senha = senha;
 
   try {
     const method = id ? 'PUT' : 'POST';
     const endpoint = id ? `${apiUrl}/${id}` : apiUrl;
-
-    const response = await fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -167,166 +142,76 @@ userForm.addEventListener('submit', async function (e) {
       },
       body: JSON.stringify(userData)
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erro ao salvar usuário');
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.msg || err.message || `Status ${res.status}`);
     }
-
     closeUserModal();
     loadUsers();
     alert(`Usuário ${id ? 'atualizado' : 'criado'} com sucesso!`);
   } catch (error) {
-    console.error('Erro:', error);
     alert('Erro ao salvar usuário: ' + error.message);
   }
 });
 
-// Load and render users with filters
+// Carrega e renderiza usuários
 async function loadUsers() {
   const token = checkAuth();
-  if (!token) return;
-
+  const params = new URLSearchParams();
+  if (searchInput.value.trim()) params.append('search', searchInput.value.trim());
+  if (filterRole.value !== 'all') {
+    // mapeia front→back apenas para filtro
+    const mapRole = { 'administrador':'admin','perito':'perito','assistente':'assistente' };
+    params.append('role', mapRole[filterRole.value] || filterRole.value);
+  }
+  if (filterDate.value) {
+    params.append('sort', filterDate.value==='recentes' ? '-createdAt':'createdAt');
+  }
+  const url = `${apiUrl}?${params}`;
   try {
-    // Construir parâmetros de filtro
-    const params = new URLSearchParams();
-    
-    // Filtro por busca
-    if (searchInput.value.trim()) {
-      params.append('search', searchInput.value.trim());
-    }
-    
-    // Filtro por tipo
-    if (filterRole.value !== 'all') {
-      // Mapeia os valores do frontend para os valores do banco
-      const roleMap = {
-        'administrador': 'admin',
-        'perito': 'expert',
-        'assistente': 'assistant'
-      };
-      const backendRole = roleMap[filterRole.value] || filterRole.value;
-      params.append('role', backendRole);
-    }
-    
-    // Ordenação
-    if (filterDate.value) {
-      params.append('sort', filterDate.value === 'recentes' ? '-createdAt' : 'createdAt');
-    }
-
-    const url = `${apiUrl}?${params.toString()}`;
-    console.log('URL da requisição:', url); // Para depuração
-
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erro ao carregar usuários');
-    }
-
-    const users = await response.json();
+    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) throw new Error((await res.json()).msg || 'Erro ao carregar usuários');
+    const users = await res.json();
     renderUsers(users);
-  } catch (error) {
-    console.error('Erro:', error);
-    showError('Erro ao carregar usuários: ' + error.message);
+  } catch (err) {
+    usersContainer.innerHTML = `<p class="error-message">Erro ao carregar usuários: ${err.message}</p>`;
   }
 }
 
+// Monta a listagem
 function renderUsers(users) {
   usersContainer.innerHTML = '';
-
-  if (!users || users.length === 0) {
+  if (!users.length) {
     usersContainer.innerHTML = `
       <div class="empty-message">
         <h3>Nenhum usuário encontrado</h3>
-        <p>${searchInput.value ? 'Tente alterar os critérios de busca' : 'Clique em "Novo Usuário" para adicionar'}</p>
-      </div>
-    `;
+        <p>${searchInput.value ? 'Tente outros critérios.' : 'Clique em "Novo Usuário".'}</p>
+      </div>`;
     return;
   }
-
-  users.forEach(user => {
-    if (!user) return;
-    
-    const userElement = document.createElement('div');
-    userElement.className = 'user-list-item';
-    userElement.innerHTML = `
-      <div class="user-list-content" onclick="openUserModal('view', '${user._id}', event)">
+  users.forEach(u => {
+    const div = document.createElement('div');
+    div.className = 'user-list-item';
+    div.innerHTML = `
+      <div class="user-list-content" onclick="openUserModal('view','${u._id}',event)">
         <div class="user-list-main">
-          <h3 class="user-name">${user.nome || 'Nome não informado'}</h3>
-          <span class="user-role role-${user.role ? user.role.toLowerCase() : 'indefinido'}">
-            ${formatUserType(user.role)}
-          </span>
+          <h3 class="user-name">${u.nome}</h3>
+          <span class="user-role role-${u.role}">${formatUserType(u.role)}</span>
         </div>
         <div class="user-list-details">
-          <div class="user-detail-group">
-            <p><strong>Email:</strong> ${user.email || 'Não informado'}</p>
-            <p><strong>Matrícula:</strong> ${user.matricula || 'N/A'}</p>
-          </div>
-          <div class="user-detail-group">
-            <p><strong>Cadastrado em:</strong> ${formatDate(user.createdAt)}</p>
-          </div>
+          <p><strong>Email:</strong> ${u.email}</p>
+          <p><strong>Matrícula:</strong> ${u.matricula}</p>
+          <p><strong>Cadastrado em:</strong> ${formatDate(u.createdAt)}</p>
         </div>
-      </div>
-    `;
-    usersContainer.appendChild(userElement);
+      </div>`;
+    usersContainer.appendChild(div);
   });
 }
 
-function showError(message) {
-  usersContainer.innerHTML = `
-    <div class="error-message">
-      <h3>Erro ao carregar usuários</h3>
-      <p>${message}</p>
-      <button class="btn btn-retry" onclick="loadUsers()">
-        <i class="fas fa-sync-alt"></i> Tentar novamente
-      </button>
-    </div>
-  `;
-}
-
-// Event listeners para filtros
-searchInput.addEventListener('input', () => {
-  // Adiciona um pequeno delay para evitar muitas requisições
-  clearTimeout(this.searchTimer);
-  this.searchTimer = setTimeout(() => {
-    loadUsers();
-  }, 500);
-});
-
+// Filtros e init
+searchInput.addEventListener('input', () => { clearTimeout(this.timer); this.timer = setTimeout(loadUsers, 500); });
 searchButton.addEventListener('click', loadUsers);
 filterRole.addEventListener('change', loadUsers);
 filterDate.addEventListener('change', loadUsers);
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-  loadUsers();
-});
-// Executa ao carregar o DOM
-document.addEventListener("DOMContentLoaded", () => {
-  loadUsers(); // Carrega os usuários ao abrir a página
-
-  // Busca ao digitar
-  document.getElementById("search-user").addEventListener("input", () => {
-    loadUsers(); // Atualiza lista com base na busca
-  });
-
-  // Filtro por tipo
-  document.getElementById("filter-role").addEventListener("change", () => {
-    loadUsers(); // Atualiza lista com base no tipo selecionado
-  });
-
-  // Ordenação por data
-  document.getElementById("filter-date").addEventListener("change", () => {
-    loadUsers(); // Atualiza lista com base na ordenação
-  });
-
-  // Fecha modal ao clicar fora dele
-  window.addEventListener("click", (event) => {
-    const modal = document.getElementById("userModal");
-    if (event.target === modal) {
-      closeUserModal();
-    }
-  });
-});
+window.addEventListener('DOMContentLoaded', loadUsers);

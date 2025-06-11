@@ -22,7 +22,7 @@ app.use(cors({
     'http://localhost:5500', // também pode incluir esse
     'https://dent-case.netlify.app'
   ], // adiciona localhost
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
 }));
@@ -49,6 +49,7 @@ app.use('/api/laudos', laudoRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vitimas', vitimaRoutes);
+
 
 // ✅ 6) Servir arquivos estáticos da pasta "uploads"
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

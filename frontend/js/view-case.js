@@ -1,371 +1,365 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const API_BASE_URL = 'http://localhost:3000/api';
-  
-  // Função utilitária para pegar elementos com segurança
+document.addEventListener('DOMContentLoaded', () => {
+  const API_BASE_URL = 'https://dentcase-backend.onrender.com/api';
+
+  // Utilitário para pegar elementos com segurança
   function getElementSafe(id) {
-    const el = document.getElementById(id);
-    if (!el) console.warn(`Elemento com id "${id}" não encontrado.`);
-    return el;
+    return document.getElementById(id);
   }
 
   // Menu toggle
   const menuToggle = getElementSafe('menu-toggle');
   const sidebar = document.querySelector('.sidebar');
-
-  if (menuToggle) {
-    menuToggle.addEventListener('click', () => {
-      sidebar?.classList.toggle('active');
-    });
+  if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
   }
 
-  // Obter ID do caso pela URL
+  // Parâmetros da URL
   const urlParams = new URLSearchParams(window.location.search);
   const caseId = urlParams.get('id');
-
   if (!caseId) {
     alert('Caso não encontrado.');
     window.location.href = 'list-case.html';
     return;
   }
 
-  // Obter dados do usuário
+  // Autenticação
   const userRole = localStorage.getItem('userRole');
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
-
   if (!token) {
     alert('Você precisa estar logado para acessar esta página.');
     window.location.href = 'login.html';
     return;
   }
 
-  // Elementos dos modais
+  // Elementos comuns
   const evidenceModal = getElementSafe('evidence-modal');
   const reportModal = getElementSafe('report-modal');
-  const closeButtons = document.querySelectorAll('.close');
-
-  closeButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      if (evidenceModal) evidenceModal.style.display = 'none';
-      if (reportModal) reportModal.style.display = 'none';
-    });
-  });
-
-  // Elementos para edição in-place
   const viewMode = getElementSafe('view-mode');
   const editMode = getElementSafe('edit-mode');
   const editButton = getElementSafe('edit-case');
   const cancelEdit = getElementSafe('cancel-edit');
   const saveEdit = getElementSafe('save-edit');
+  const statusSelect = getElementSafe('case-status-select');
+  const evidenceForm = getElementSafe('evidence-form');
 
-  // Configuração da interface
+  // Fechar modais
+  document.querySelectorAll('.close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (evidenceModal) evidenceModal.style.display = 'none';
+      if (reportModal) reportModal.style.display = 'none';
+    });
+  });
+
+  // Mapa de estados (invertido para busca por nome)
+  const estadosMap = {
+    'Rondônia': 11, 'Acre': 12, 'Amazonas': 13, 'Roraima': 14, 'Pará': 15,
+    'Amapá': 16, 'Tocantins': 17, 'Maranhão': 21, 'Piauí': 22, 'Ceará': 23,
+    'Rio Grande do Norte': 24, 'Paraíba': 25, 'Pernambuco': 26, 'Alagoas': 27,
+    'Sergipe': 28, 'Bahia': 29, 'Minas Gerais': 31, 'Espírito Santo': 32,
+    'Rio de Janeiro': 33, 'São Paulo': 35, 'Paraná': 41, 'Santa Catarina': 42,
+    'Rio Grande do Sul': 43, 'Mato Grosso do Sul': 50, 'Mato Grosso': 51,
+    'Goiás': 52, 'Distrito Federal': 53
+  };
+
+  // Permissões de UI
   async function setupUI() {
     try {
-      const response = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
+      const res = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      if (!response.ok) throw new Error('Erro ao verificar permissões.');
-
-      const caseData = await response.json();
-      const isOwner = caseData.assignedUser?.toString() === userId;
-
-      if (userRole === 'admin') {
-        editButton?.style.setProperty('display', 'inline-block');
-        getElementSafe('delete-case')?.style.setProperty('display', 'inline-block');
-        getElementSafe('add-evidence')?.style.setProperty('display', 'inline-block');
-      } else if (userRole === 'perito') {
-        editButton?.style.setProperty('display', isOwner ? 'inline-block' : 'none');
-        getElementSafe('delete-case')?.style.setProperty('display', 'none');
-        getElementSafe('add-evidence')?.style.setProperty('display', isOwner ? 'inline-block' : 'none');
-      } else if (userRole === 'assistente') {
-        editButton?.style.setProperty('display', 'none');
-        getElementSafe('delete-case')?.style.setProperty('display', 'none');
-        getElementSafe('add-evidence')?.style.setProperty('display', isOwner ? 'inline-block' : 'none');
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Erro ao verificar permissões.');
       }
+      
+      const data = await res.json();
+      const isOwner = data.assignedUser?.toString() === userId;
 
+      // Elementos condicionais
+      const deleteCaseBtn = getElementSafe('delete-case');
+      const addEvidenceBtn = getElementSafe('add-evidence');
+      
+      if (userRole === 'admin') {
+        if (editButton) editButton.classList.remove('hidden');
+        if (deleteCaseBtn) deleteCaseBtn.classList.remove('hidden');
+        if (addEvidenceBtn) addEvidenceBtn.classList.remove('hidden');
+      } else if (userRole === 'perito') {
+        if (editButton) editButton.classList.toggle('hidden', !isOwner);
+        if (deleteCaseBtn) deleteCaseBtn.classList.add('hidden');
+        if (addEvidenceBtn) addEvidenceBtn.classList.toggle('hidden', !isOwner);
+      } else if (userRole === 'assistente') {
+        if (editButton) editButton.classList.add('hidden');
+        if (deleteCaseBtn) deleteCaseBtn.classList.add('hidden');
+        if (addEvidenceBtn) addEvidenceBtn.classList.toggle('hidden', !(data.assignedUser?.toString() === userId));
+      }
     } catch (error) {
       console.error('Erro ao configurar UI:', error);
+      alert(`Erro de permissão: ${error.message}`);
     }
   }
 
-  // Carregar detalhes do caso
+  // Função segura para definir texto
+  function setText(id, text) {
+    const el = getElementSafe(id);
+    if (el) el.textContent = text;
+  }
+
+  // Carregar dados do caso
   async function loadCaseDetails() {
     try {
-      const response = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
+      const res = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Erro ao carregar caso.');
+      }
+      
+      const c = await res.json();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Caso não encontrado');
+      // Atualizar status
+      if (statusSelect) {
+        const statusVal = c.status?.toLowerCase().replace(/\s+/g, '_') || 'aberto';
+        statusSelect.value = statusVal;
+        statusSelect.className = `status-select status-${statusVal}`;
       }
 
-      const caseData = await response.json();
-      console.log('Dados do caso:', caseData);
-
-      // Preencher informações
-      getElementSafe('case-title').textContent = `${caseData.patientName} - ${caseData.incidentDescription?.slice(0, 50) || ''}${caseData.incidentDescription?.length > 50 ? '...' : ''}`;
-      getElementSafe('case-id').textContent = `#${caseData.caseId || caseData._id}`;
-      getElementSafe('case-status').textContent = caseData.status;
-      getElementSafe('case-status').className = `case-status status-${caseData.status?.toLowerCase().replace(' ', '-') || 'desconhecido'}`;
-      getElementSafe('case-description').textContent = caseData.description || 'Sem descrição';
-      getElementSafe('case-date').textContent = caseData.createdAt ? new Date(caseData.createdAt).toLocaleDateString('pt-BR') : 'Não informado';
-      getElementSafe('case-expert').textContent = caseData.createdBy?.name || 'Responsável não informado';
-
-
-      getElementSafe('patient-name').textContent = caseData.patientName || 'Não informado';
-      getElementSafe('patient-dob').textContent = caseData.patientDOB ? new Date(caseData.patientDOB).toLocaleDateString('pt-BR') : 'Não informado';
-      getElementSafe('patient-gender').textContent = caseData.patientGender || 'Não informado';
-      getElementSafe('patient-id').textContent = caseData.patientID || 'Não informado';
-      getElementSafe('patient-contact').textContent = caseData.patientContact || 'Não informado';
-
-      getElementSafe('incident-date').textContent = caseData.incidentDate ? new Date(caseData.incidentDate).toLocaleString('pt-BR') : 'Não informado';
-      getElementSafe('incident-location').textContent = caseData.incidentLocation || 'Não informado';
-      getElementSafe('incident-description').textContent = caseData.incidentDescription || 'Não informado';
-      getElementSafe('incident-weapon').textContent = caseData.incidentWeapon || 'Não informado';
-
-      const estadosMap = {
-        11: 'Rondônia',
-        12: 'Acre',
-        13: 'Amazonas',
-        14: 'Roraima',
-        15: 'Pará',
-        16: 'Amapá',
-        17: 'Tocantins',
-        21: 'Maranhão',
-        22: 'Piauí',
-        23: 'Ceará',
-        24: 'Rio Grande do Norte',
-        25: 'Paraíba',
-        26: 'Pernambuco', // <-- seu caso
-        27: 'Alagoas',
-        28: 'Sergipe',
-        29: 'Bahia',
-        31: 'Minas Gerais',
-        32: 'Espírito Santo',
-        33: 'Rio de Janeiro',
-        35: 'São Paulo',
-        41: 'Paraná',
-        42: 'Santa Catarina',
-        43: 'Rio Grande do Sul',
-        50: 'Mato Grosso do Sul',
-        51: 'Mato Grosso',
-        52: 'Goiás',
-        53: 'Distrito Federal'
+      // Preencher campos de visualização (PROTEÇÃO CONTRA ELEMENTOS AUSENTES)
+      const safeSetText = (id, text) => {
+        const el = getElementSafe(id);
+        if (el) el.textContent = text;
       };
-      
-      // Depois, no seu código:
-      const estadoCodigo = caseData.estado;
-      const estadoNome = estadosMap[estadoCodigo] || estadoCodigo || 'Não informado';
-      
-      getElementSafe('estado').textContent = estadoNome;
-      
-      getElementSafe('bairro').textContent = caseData.bairro || 'Não informado';
-      getElementSafe('case-type').textContent = caseData.caseType || 'Não informado';
-      getElementSafe('identified').textContent = caseData.identified ? 'Sim' : 'Não';
-      getElementSafe('injury-regions').textContent = Array.isArray(caseData.injuryRegions) ? caseData.injuryRegions.join(', ') : (caseData.injuryRegions || 'Não informado');
 
+      safeSetText('case-title', `${c.patientName} - ${c.incidentDescription?.slice(0,50) || ''}${c.incidentDescription?.length > 50 ? '...' : ''}`);
+      safeSetText('case-id', `#${c.caseId || c._id}`);
+      safeSetText('case-description', c.description || 'Sem descrição');
+      safeSetText('case-date', c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : 'Não informado');
+      safeSetText('case-expert', c.createdBy?.name || 'Responsável não informado');
 
+      safeSetText('patient-name', c.patientName || 'Não informado');
+      safeSetText('patient-dob', c.patientDOB ? new Date(c.patientDOB).toLocaleDateString('pt-BR') : 'Não informado');
+      safeSetText('patient-gender', c.patientGender || 'Não informado');
+      safeSetText('patient-id', c.patientID || 'Não informado');
+      safeSetText('patient-contact', c.patientContact || 'Não informado');
+
+      safeSetText('incident-date', c.incidentDate ? new Date(c.incidentDate).toLocaleString('pt-BR') : 'Não informado');
+      safeSetText('incident-location', c.incidentLocation || 'Não informado');
+      safeSetText('incident-description', c.incidentDescription || 'Não informado');
+      safeSetText('incident-weapon', c.incidentWeapon || 'Não informado');
+
+      // Estado: converter código para nome
+      const estadoCode = c.estado;
+      const estadoName = Object.keys(estadosMap).find(key => estadosMap[key] === estadoCode);
+      safeSetText('estado', estadoName || 'Não informado');
+      
+      safeSetText('bairro', c.bairro || 'Não informado');
+      safeSetText('case-type', c.caseType || 'Não informado');
+      safeSetText('identified', c.identified ? 'Sim' : 'Não');
+      safeSetText('injury-regions', Array.isArray(c.injuryRegions) ? c.injuryRegions.join(', ') : 'Não informado');
+
+      // Preencher formulário de edição
+      populateEditForm(c);
+
+      // Carregar evidências
       await loadEvidences();
     } catch (error) {
       console.error('Erro ao carregar caso:', error);
-      alert(`Erro ao carregar detalhes do caso: ${error.message}`);
+      alert(`Erro: ${error.message}`);
       window.location.href = 'list-case.html';
     }
   }
 
-  // Função para preencher o formulário de edição com os dados atuais
-  function populateEditForm() {
-    document.getElementById('edit-case-description').value = document.getElementById('case-description').textContent;
-    document.getElementById('edit-patient-name').value = document.getElementById('patient-name').textContent;
-    document.getElementById('edit-patient-dob').value = formatDateForInput(document.getElementById('patient-dob').textContent);
-    document.getElementById('edit-patient-gender').value = document.getElementById('patient-gender').textContent.toLowerCase() || 'nao_informado';
-    document.getElementById('edit-patient-id').value = document.getElementById('patient-id').textContent;
-    document.getElementById('edit-patient-contact').value = document.getElementById('patient-contact').textContent;
-    document.getElementById('edit-incident-date').value = formatDateTimeForInput(document.getElementById('incident-date').textContent);
-    document.getElementById('edit-incident-location').value = document.getElementById('incident-location').textContent;
-    document.getElementById('edit-incident-description').value = document.getElementById('incident-description').textContent;
-    document.getElementById('edit-incident-weapon').value = document.getElementById('incident-weapon').textContent;
-    document.getElementById('edit-estado').value = document.getElementById('estado').textContent;
-    document.getElementById('edit-bairro').value = document.getElementById('bairro').textContent;
-    document.getElementById('edit-case-type').value = document.getElementById('case-type').textContent;
-    document.getElementById('edit-identified').checked = document.getElementById('identified').textContent.toLowerCase() === 'sim';
-    document.getElementById('edit-injury-regions').value = document.getElementById('injury-regions').textContent;
+  // Preencher form de edição
+  function populateEditForm(c) {
+    const safeSetValue = (id, value) => {
+      const el = getElementSafe(id);
+      if (el) el.value = value;
+    };
 
-  }
+    const safeSetChecked = (id, checked) => {
+      const el = getElementSafe(id);
+      if (el) el.checked = checked;
+    };
 
-  // Delegation: adiciona listener para os botões Gerar Relatório das evidências
- // Delegation: adiciona listener para os botões Gerar Relatório das evidências
-document.addEventListener('DOMContentLoaded', () => {
-  const evidenceList = document.getElementById('evidence-list');
-  if (!evidenceList) {
-    return console.error('Elemento evidence-list não encontrado');
-  }
+    safeSetValue('edit-case-description', c.description || '');
+    safeSetValue('edit-case-expert', c.createdBy?.name || '');
+    safeSetValue('edit-patient-name', c.patientName || '');
+    safeSetValue('edit-patient-dob', c.patientDOB ? new Date(c.patientDOB).toISOString().slice(0,10) : '');
+    safeSetValue('edit-patient-gender', c.patientGender?.toLowerCase() || 'nao_informado');
+    safeSetValue('edit-patient-id', c.patientID || '');
+    safeSetValue('edit-patient-contact', c.patientContact || '');
 
-  evidenceList.addEventListener('click', async (event) => {
-    if (event.target.classList.contains('btn-generate-report')) {
-      const evidenceId = event.target.getAttribute('data-evidence-id');
-      if (!evidenceId) return alert('ID da evidência não encontrado.');
+    safeSetValue('edit-incident-date', c.incidentDate ? new Date(c.incidentDate).toISOString().slice(0,16) : '');
+    safeSetValue('edit-incident-location', c.incidentLocation || '');
+    safeSetValue('edit-incident-description', c.incidentDescription || '');
+    safeSetValue('edit-incident-weapon', c.incidentWeapon || '');
 
-      const token = localStorage.getItem('token');
-      if (!token) return alert('Usuário não autenticado');
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/evidences/${evidenceId}/report`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Erro ao gerar relatório');
-        }
-
-        const contentType = response.headers.get('Content-Type');
-        if (!contentType || !contentType.includes('application/pdf')) {
-          throw new Error('Resposta da API não é um PDF');
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        window.open(url);
-        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
-
-      } catch (error) {
-        console.error('Erro ao gerar relatório:', error);
-        alert(`Falha ao gerar relatório: ${error.message}`);
-      }
-    }
-  });
-});
-
-  
-
-
-  // Funções auxiliares para formatação de datas
-  function formatDateForInput(dateString) {
-    if (!dateString || dateString === 'Não informado') return '';
-    const parts = dateString.split('/');
-    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-  }
-
-  function formatDateTimeForInput(dateTimeString) {
-    if (!dateTimeString || dateTimeString === 'Não informado') return '';
-    const [datePart, timePart] = dateTimeString.split(' ');
-    const [day, month, year] = datePart.split('/');
-    const [hours, minutes] = timePart.split(':');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-  }
-
-  // Alternar entre modos de visualização e edição
-  function toggleEditMode(enable) {
-    if (enable) {
-      populateEditForm();
-      viewMode.style.display = 'none';
-      editMode.style.display = 'block';
-    } else {
-      viewMode.style.display = 'block';
-      editMode.style.display = 'none';
-    }
-  }
-
-  // Event listeners para edição
-  if (editButton && cancelEdit && saveEdit) {
-    editButton.addEventListener('click', () => toggleEditMode(true));
-    cancelEdit.addEventListener('click', () => toggleEditMode(false));
+    // Estado: converter código para nome
+    const estadoCode = c.estado;
+    const estadoName = Object.keys(estadosMap).find(key => estadosMap[key] === estadoCode);
+    safeSetValue('edit-estado', estadoName || '');
     
-    saveEdit.addEventListener('click', async (e) => {
+    safeSetValue('edit-bairro', c.bairro || '');
+    safeSetValue('edit-case-type', c.caseType || '');
+    safeSetChecked('edit-identified', !!c.identified);
+    
+    const injuryRegionsEl = getElementSafe('edit-injury-regions');
+    if (injuryRegionsEl) {
+      injuryRegionsEl.value = Array.isArray(c.injuryRegions) ? 
+        c.injuryRegions.join(', ') : '';
+    }
+  }
+
+  // Alternar modos de visualização/edição
+  function toggleEditMode(enable) {
+    if (viewMode) viewMode.style.display = enable ? 'none' : 'block';
+    if (editMode) editMode.style.display = enable ? 'block' : 'none';
+  }
+  
+  if (editButton) {
+    editButton.addEventListener('click', () => toggleEditMode(true));
+  }
+  
+  if (cancelEdit) {
+    cancelEdit.addEventListener('click', () => toggleEditMode(false));
+  }
+
+  // Salvar edição
+  if (saveEdit) {
+    saveEdit.addEventListener('click', async e => {
       e.preventDefault();
       
-      const updatedData = {
-        description: document.getElementById('edit-case-description').value,
-        expert: document.getElementById('edit-case-expert').value,
-        patientName: document.getElementById('edit-patient-name').value,
-        patientDOB: document.getElementById('edit-patient-dob').value,
-        patientGender: document.getElementById('edit-patient-gender').value,
-        patientID: document.getElementById('edit-patient-id').value,
-        patientContact: document.getElementById('edit-patient-contact').value,
-        incidentDate: document.getElementById('edit-incident-date').value,
-        incidentLocation: document.getElementById('edit-incident-location').value,
-        incidentDescription: document.getElementById('edit-incident-description').value,
-        incidentWeapon: document.getElementById('edit-incident-weapon').value,
-        estado: document.getElementById('edit-estado').value,
-        bairro: document.getElementById('edit-bairro').value,
-  
+      const getValue = (id) => {
+        const el = getElementSafe(id);
+        return el ? el.value : '';
       };
-
+      
+      // Converter nome do estado para código
+      const estadoName = getValue('edit-estado');
+      const estadoCode = estadosMap[estadoName] || '';
+      
+      const updated = {
+        description: getValue('edit-case-description'),
+        status: statusSelect ? statusSelect.value.replace(/_/g, ' ') : 'aberto',
+        createdBy: getValue('edit-case-expert'),
+        patientName: getValue('edit-patient-name'),
+        patientDOB: getValue('edit-patient-dob'),
+        patientGender: getValue('edit-patient-gender'),
+        patientID: getValue('edit-patient-id'),
+        patientContact: getValue('edit-patient-contact'),
+        incidentDate: getValue('edit-incident-date'),
+        incidentLocation: getValue('edit-incident-location'),
+        incidentDescription: getValue('edit-incident-description'),
+        incidentWeapon: getValue('edit-incident-weapon'),
+        estado: estadoCode,
+        bairro: getValue('edit-bairro'),
+        caseType: getValue('edit-case-type'),
+        identified: !!getElementSafe('edit-identified')?.checked,
+        injuryRegions: getValue('edit-injury-regions').split(',').map(s => s.trim())
+      };
+      
       try {
-        const response = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
+        const res = await fetch(`${API_BASE_URL}/cases/${caseId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+          headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${token}` 
           },
-          body: JSON.stringify(updatedData)
+          body: JSON.stringify(updated)
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
+        
+        if (!res.ok) {
+          const errorData = await res.json();
           throw new Error(errorData.message || 'Erro ao atualizar caso');
         }
-
+        
         alert('Caso atualizado com sucesso!');
         await loadCaseDetails();
         toggleEditMode(false);
       } catch (error) {
         console.error('Erro ao atualizar caso:', error);
-        alert(`Falha ao atualizar caso: ${error.message}`);
+        alert(`Falha: ${error.message}`);
       }
     });
   }
 
   // Carregar evidências
   async function loadEvidences() {
-    const evidenceList = getElementSafe('evidence-list');
-    const emptyMessage = getElementSafe('empty-evidence-message');
-  
+    const list = getElementSafe('evidence-list');
+    const emptyMsg = getElementSafe('empty-evidence-message');
+    
+    if (!list) return;
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/evidences/case/${caseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetch(`${API_BASE_URL}/evidences/case/${caseId}`, { 
+        headers: { 'Authorization': `Bearer ${token}` } 
       });
-  
-      if (!response.ok) throw new Error('Erro ao carregar evidências');
-  
-      const evidences = await response.json();
-  
-      if (!evidences.length) {
-        if (emptyMessage) emptyMessage.style.display = 'block';
-        if (evidenceList) evidenceList.innerHTML = '';
+      
+      if (!res.ok) throw new Error('Erro ao carregar evidências');
+      
+      const items = await res.json();
+      
+      if (!items || !items.length) {
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        list.innerHTML = '';
         return;
       }
-  
-      if (emptyMessage) emptyMessage.style.display = 'none';
-      if (evidenceList) evidenceList.innerHTML = '';
-  
-      evidences.forEach(ev => {
+      
+      if (emptyMsg) emptyMsg.style.display = 'none';
+      list.innerHTML = '';
+      
+      items.forEach(ev => {
         const div = document.createElement('div');
         div.className = 'evidence-item';
         div.innerHTML = `
           <div class="evidence-content">
-            <h4>${ev.collectionDate ? new Date(ev.collectionDate).toLocaleDateString('pt-BR') : 'Data não informada'} ${ev.collectionTime ? ' - ' + ev.collectionTime : ''}</h4>
+            <h4>${ev.collectionDate ? new Date(ev.collectionDate).toLocaleDateString('pt-BR') : 'Data não informada'}${ev.collectionTime ? ' - ' + ev.collectionTime : ''}</h4>
             <p>${ev.description || 'Descrição não informada'}</p>
-            ${ev.latitude && ev.longitude ? `<p><strong>Local:</strong> ${ev.latitude}, ${ev.longitude}</p>` : ''}
-            ${ev.imageUrl ? `<img src="${ev.imageUrl}" alt="Evidência" class="evidence-image">` : ''}
-            <p><strong>Adicionada por:</strong> ${ev.addedBy?.name || 'Usuário não informado'}</p>
+            ${ev.latitude && ev.longitude ? 
+              `<p><strong>Local:</strong> ${ev.latitude}, ${ev.longitude}</p>` : ''}
+            ${ev.imageUrl ? 
+              `<img src="${ev.imageUrl}" class="evidence-image">` : ''}
+            <p><strong>Adicionada por:</strong> ${ev.addedBy?.name || 'Não informado'}</p>
             <button class="btn-generate-report" data-evidence-id="${ev._id}">Gerar Laudo</button>
-          </div>
-        `;
-        if (evidenceList) evidenceList.appendChild(div);
+          </div>`;
+        list.appendChild(div);
       });
-      
-  
     } catch (error) {
       console.error('Erro ao carregar evidências:', error);
-      if (emptyMessage) {
-        emptyMessage.style.display = 'block';
-        emptyMessage.innerHTML = '<p>Erro ao carregar evidências. Tente recarregar a página.</p>';
+      if (emptyMsg) {
+        emptyMsg.textContent = 'Erro ao carregar evidências.';
+        emptyMsg.style.display = 'block';
       }
     }
+  }
+
+  // Gerar Laudo PDF
+  const evidenceList = getElementSafe('evidence-list');
+  if (evidenceList) {
+    evidenceList.addEventListener('click', async e => {
+      if (!e.target.classList.contains('btn-generate-report')) return;
+      const evId = e.target.getAttribute('data-evidence-id');
+      if (!evId) return;
+      
+      try {
+        const res = await fetch(`${API_BASE_URL}/evidences/${evId}/report`, { 
+          headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        
+        if (!res.ok) throw new Error('Erro ao gerar laudo.');
+        
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      } catch (error) {
+        console.error('Erro ao gerar laudo:', error);
+        alert(`Falha: ${error.message}`);
+      }
+    });
   }
 
   // Abrir modal de adicionar evidência
@@ -375,106 +369,88 @@ document.addEventListener('DOMContentLoaded', () => {
     if (evidenceModal) evidenceModal.style.display = 'block';
   });
 
- // Submeter evidência 
- getElementSafe('evidence-form')?.addEventListener('submit', async function (e) {
-  e.preventDefault();
+  // Submeter evidência 
+  if (evidenceForm) {
+    evidenceForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-  const form = e.target;
+      const form = e.target;
+      const description = form.querySelector('#evidence-description-field').value.trim();
+      const fileInput = form.querySelector('#evidence-file');
+      const file = fileInput.files[0];
+      
+      if (!description) {
+        alert('Por favor, insira uma descrição para a evidência.');
+        return;
+      }
 
-  const collectionDate = form.querySelector('#collection-date').value || new Date().toISOString();
-  const collectionTime = form.querySelector('#collection-time').value || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const description = form.querySelector('#evidence-description-field').value.trim();
-  const latitude = form.querySelector('#evidence-lat').value.trim();
-  const longitude = form.querySelector('#evidence-long').value.trim();
-  const imageUrl = form.querySelector('#evidence-image-url').value.trim();
-  const fileInput = form.querySelector('#evidence-file');
-  const file = fileInput.files[0]; // pegar o arquivo selecionado
+      const formData = new FormData();
+      formData.append('case', caseId);
+      formData.append('collectionDate', form.querySelector('#collection-date').value || new Date().toISOString());
+      formData.append('collectionTime', form.querySelector('#collection-time').value || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      formData.append('description', description);
+      formData.append('latitude', form.querySelector('#evidence-lat').value.trim() || '');
+      formData.append('longitude', form.querySelector('#evidence-long').value.trim() || '');
+      formData.append('imageUrl', form.querySelector('#evidence-image-url').value.trim() || '');
+      
+      if (file) {
+        formData.append('imageFile', file);
+      }
 
-  if (!description) {
-    alert('Por favor, insira uma descrição para a evidência.');
-    return;
-  }
+      try {
+        const response = await fetch(`${API_BASE_URL}/evidences`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
 
-  const formData = new FormData();
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Erro ao adicionar evidência');
+        }
 
-  // Dados texto
-  formData.append('case', caseId);
-  formData.append('collectionDate', collectionDate);
-  formData.append('collectionTime', collectionTime);
-  formData.append('description', description);
-  formData.append('latitude', latitude || '');
-  formData.append('longitude', longitude || '');
+        alert('Evidência adicionada com sucesso!');
+        evidenceModal.style.display = 'none';
+        form.reset();
+        await loadEvidences();
 
-  // URL de imagem (se preenchida)
-  if (imageUrl) {
-    formData.append('imageUrl', imageUrl);
-  }
-
-  // Arquivo (se selecionado)
-  if (file) {
-    formData.append('imageFile', file);
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/evidences`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}` // NÃO passar 'Content-Type' aqui, deixe o browser definir o multipart boundary
-      },
-      body: formData
+      } catch (error) {
+        console.error('Erro:', error);
+        alert(`Falha ao adicionar evidência: ${error.message}`);
+      }
     });
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      throw new Error(responseData.message || 'Erro ao adicionar evidência');
-    }
-
-    alert('Evidência adicionada com sucesso!');
-    if (evidenceModal) evidenceModal.style.display = 'none';
-    form.reset();
-    
-    await loadEvidences();
-
-  } catch (error) {
-    console.error('Erro:', error);
-    alert(`Falha ao adicionar evidência: ${error.message}`);
   }
-});
 
   // Usar Minha Localização
+  const btnUseLocation = getElementSafe('get-location');
+  const inputLat = getElementSafe('evidence-lat');
+  const inputLong = getElementSafe('evidence-long');
 
-  const btnUseLocation = document.getElementById('get-location');
-  const inputLat = document.getElementById('evidence-lat');
-  const inputLong = document.getElementById('evidence-long');
+  if (btnUseLocation && inputLat && inputLong) {
+    btnUseLocation.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não é suportada pelo seu navegador.');
+        return;
+      }
 
-  btnUseLocation?.addEventListener('click', () => {
-  if (!navigator.geolocation) {
-    alert('Geolocalização não é suportada pelo seu navegador.');
-    return;
+      btnUseLocation.disabled = true;
+      btnUseLocation.textContent = 'Obtendo localização...';
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          inputLat.value = position.coords.latitude.toFixed(6);
+          inputLong.value = position.coords.longitude.toFixed(6);
+          btnUseLocation.disabled = false;
+          btnUseLocation.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar Minha Localização';
+        },
+        (error) => {
+          alert('Erro ao obter localização: ' + error.message);
+          btnUseLocation.disabled = false;
+          btnUseLocation.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar Minha Localização';
+        }
+      );
+    });
   }
-
-  btnUseLocation.disabled = true;
-  btnUseLocation.textContent = 'Obtendo localização...';
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      inputLat.value = position.coords.latitude.toFixed(6);
-      inputLong.value = position.coords.longitude.toFixed(6);
-
-      alert('Localização preenchida com sucesso!');
-
-      btnUseLocation.disabled = false;
-      btnUseLocation.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar Minha Localização';
-    },
-    (error) => {
-      alert('Erro ao obter localização: ' + error.message);
-      btnUseLocation.disabled = false;
-      btnUseLocation.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar Minha Localização';
-    }
-  );
-});
-
 
   // Excluir caso
   getElementSafe('delete-case')?.addEventListener('click', async () => {
@@ -500,232 +476,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Inicializar
+  // Gerar Relatório Geral
+  const generateReportBtn = getElementSafe('generate-report');
+  const reportForm = getElementSafe('report-form');
+  
+  if (generateReportBtn && reportModal) {
+    generateReportBtn.addEventListener('click', () => {
+      reportModal.style.display = 'block';
+    });
+  }
+  
+  if (reportForm) {
+    reportForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
+      const margin = 15;
+      const width = doc.internal.pageSize.getWidth();
+
+      const title = getElementSafe('report-title')?.value.toUpperCase() || 'RELATÓRIO DO CASO';
+      const notes = getElementSafe('report-notes')?.value || '';
+
+      doc.setFontSize(22);
+      doc.text(title, width / 2, y, { align: 'center' });
+      y += 10;
+      doc.setFontSize(12);
+
+      const safeGetText = (id) => {
+        const el = getElementSafe(id);
+        return el ? el.textContent : 'Não informado';
+      };
+
+      const addField = (label, value) => {
+        doc.setFont(undefined, 'bold'); 
+        doc.text(`${label}:`, margin, y);
+        doc.setFont(undefined, 'normal');
+        
+        const safeValue = value || 'Não informado';
+        const lines = doc.splitTextToSize(safeValue, width - margin - 40);
+        
+        lines.forEach((line, i) => {
+          doc.text(line, margin + 40, y + (i * 7));
+        });
+        
+        y += (lines.length * 7) + 4;
+      };
+
+      addField('ID DO CASO', safeGetText('case-id'));
+      addField('TÍTULO', safeGetText('case-title'));
+      addField('DESCRIÇÃO', safeGetText('case-description'));
+      addField('PACIENTE', safeGetText('patient-name'));
+      addField('INCIDENTE', safeGetText('incident-description'));
+
+      if (notes) {
+        y += 10;
+        doc.setFont(undefined, 'bold'); 
+        doc.text('OBSERVAÇÕES:', margin, y);
+        y += 8;
+        doc.setFont(undefined, 'normal');
+        const noteLines = doc.splitTextToSize(notes, width - margin * 2);
+        noteLines.forEach((line, i) => {
+          doc.text(line, margin, y + (i * 7));
+        });
+      }
+
+      doc.save(`relatorio_caso_${caseId}.pdf`);
+      if (reportModal) reportModal.style.display = 'none';
+      reportForm.reset();
+    });
+  }
+
+  // Inicialização
   setupUI();
   loadCaseDetails();
 });
-
-
-
-
-
-
-// Modal de Relatório
-// Referências dos elementos
-const btnGenerateReport = document.getElementById('generate-report');
-const reportModal = document.getElementById('report-modal');
-const reportForm = document.getElementById('report-form');
-const reportCloseBtn = reportModal.querySelector('.close');
-
-// Função para abrir modal
-btnGenerateReport.addEventListener('click', () => {
-  reportModal.style.display = 'block';
-});
-
-// Função para fechar modal (clicando no X)
-reportCloseBtn.addEventListener('click', () => {
-  reportModal.style.display = 'none';
-});
-
-// Fechar modal clicando fora do conteúdo
-window.addEventListener('click', (e) => {
-  if (e.target === reportModal) {
-    reportModal.style.display = 'none';
-  }
-});
-
-// Função para gerar o PDF
-reportForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4'); // página A4, mm
-
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 15;
-  let y = 20;
-
-  // Dados do formulário e da página
-  const title = document.getElementById('report-title').value || "RELATÓRIO DO CASO";
-  const notes = document.getElementById('report-notes').value || "";
-
-  const caseTitle = document.getElementById('case-title').textContent;
-  const caseId = document.getElementById('case-id').textContent;
-  const caseStatus = document.getElementById('case-status').textContent;
-  const caseDescription = document.getElementById('case-description').textContent;
-  const caseDate = document.getElementById('case-date').textContent;
-  const caseExpert = document.getElementById('case-expert').textContent;
-
-  const patientName = document.getElementById('patient-name').textContent;
-  const patientDob = document.getElementById('patient-dob').textContent;
-  const patientGender = document.getElementById('patient-gender').textContent;
-  const patientId = document.getElementById('patient-id').textContent;
-  const patientContact = document.getElementById('patient-contact').textContent;
-
-  const incidentDate = document.getElementById('incident-date').textContent;
-  const incidentLocation = document.getElementById('incident-location').textContent;
-  const incidentDescription = document.getElementById('incident-description').textContent;
-  const incidentWeapon = document.getElementById('incident-weapon').textContent;
-
-  // Cabeçalho: logo + título
-  // Se tiver logo, pode usar doc.addImage (exemplo comentado)
-  // const imgData = 'data:image/png;base64,...';
-  // doc.addImage(imgData, 'PNG', margin, y, 30, 30);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor('#003366'); // azul escuro
-  doc.text(title.toUpperCase(), pageWidth / 2, y, { align: 'center' });
-  y += 12;
-
-  // Linha horizontal
-  doc.setDrawColor('#003366');
-  doc.setLineWidth(0.8);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 10;
-
-  // Função auxiliar para texto com quebra automática
-  function addWrappedText(text, x, yPos, maxWidth, lineHeight) {
-    const splitText = doc.splitTextToSize(text, maxWidth);
-    doc.text(splitText, x, yPos);
-    return yPos + splitText.length * lineHeight;
-  }
-
-  // Função para título de seção
-  function addSectionTitle(text, yPos) {
-    doc.setFontSize(16);
-    doc.setTextColor('#003366');
-    doc.setFont('helvetica', 'bold');
-    doc.text(text.toUpperCase(), margin, yPos);
-    yPos += 7;
-    doc.setDrawColor('#003366');
-    doc.setLineWidth(0.5);
-    doc.line(margin, yPos, pageWidth - margin, yPos);
-    return yPos + 10;
-  }
-
-  // Função para campo (label: bold, valor: normal)
-  function addField(label, value, yPos) {
-    const labelWidth = 40;
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor('#000');
-    doc.text(label + ':', margin, yPos);
-    doc.setFont('helvetica', 'normal');
-    const wrappedHeight = addWrappedText(value, margin + labelWidth, yPos - 3, pageWidth - margin * 2 - labelWidth, 6);
-    return wrappedHeight + 4; // pequeno espaçamento depois do campo
-  }
-
-  // Dados gerais do caso
-  y = addField('ID DO CASO', caseId, y);
-  y = addField('TÍTULO', caseTitle, y);
-  y = addField('STATUS', caseStatus, y);
-
-  y = addSectionTitle('Informações do Caso', y);
-
-  y = addField('Descrição', caseDescription, y);
-  y = addField('Data de Criação', caseDate, y);
-  y = addField('Responsável', caseExpert, y);
-
-  y = addSectionTitle('Informações do Paciente', y);
-
-  y = addField('Nome', patientName, y);
-  y = addField('Data de Nascimento', patientDob, y);
-  y = addField('Gênero', patientGender, y);
-  y = addField('Documento', patientId, y);
-  y = addField('Contato', patientContact, y);
-
-  y = addSectionTitle('Informações do Incidente', y);
-
-  y = addField('Data', incidentDate, y);
-  y = addField('Local', incidentLocation, y);
-  y = addField('Descrição', incidentDescription, y);
-  y = addField('Instrumento/Arma', incidentWeapon, y);
-
-  if (notes.trim() !== "") {
-    y = addSectionTitle('Observações Adicionais', y);
-    y = addField('Notas', notes, y);
-  }
-
-  // Rodapé com página e data de geração
-  const dateStr = new Date().toLocaleString();
-  doc.setFontSize(10);
-  doc.setTextColor('#666');
-  doc.text(`Gerado em: ${dateStr}`, margin, 290);
-  doc.text(`Página 1 de 1`, pageWidth - margin, 290, { align: 'right' });
-
-  // Salvar arquivo PDF
-  doc.save(`relatorio_caso_${caseId}.pdf`);
-
-  reportModal.style.display = 'none';
-  reportForm.reset();
-});
-
-
-
-
-const statusSpan = document.getElementById('case-status');
-const btnChangeStatus = document.getElementById('change-status');
-
-// Status possíveis para o caso (ajuste para os status que seu backend aceita)
-const statuses = ['em andamento', 'finalizado', 'arquivado'];
-
-// Pega o status atual do texto no span (garanta que o texto esteja no formato esperado)
-let currentStatus = statusSpan.textContent.trim().toLowerCase();
-
-// 🔄 Pega o ID real do caso da URL
-const urlParams = new URLSearchParams(window.location.search);
-const caseId = urlParams.get('id'); // Ex: ?id=6834f3793ee3d8364cd6cf7f
-
-if (!caseId) {
-  alert('ID do caso não encontrado na URL.');
-}
-
-// Função para pegar o índice do status atual
-function getStatusIndex(status) {
-  return statuses.indexOf(status);
-}
-
-// Função para alterar status localmente e no backend
-async function changeStatus() {
-  let currentIndex = getStatusIndex(currentStatus);
-  let nextIndex = (currentIndex + 1) % statuses.length;
-  let nextStatus = statuses[nextIndex];
-
-  const token = localStorage.getItem('token'); 
-
-  if (!token) {
-    alert('Usuário não autenticado. Faça login novamente.');
-    return;
-  }
-
-  try {
-    const response = await fetch(`http://localhost:3000/api/cases/${caseId}/status`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({ status: nextStatus }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erro ao alterar status no servidor');
-    }
-
-    const updatedCase = await response.json();
-
-    statusSpan.textContent = updatedCase.status.charAt(0).toUpperCase() + updatedCase.status.slice(1);
-    currentStatus = updatedCase.status;
-
-    alert(`Status alterado para: ${updatedCase.status}`);
-
-  } catch (error) {
-    alert('Falha ao alterar status: ' + error.message);
-  }
-}
-
-btnChangeStatus.addEventListener('click', changeStatus);
-
-
